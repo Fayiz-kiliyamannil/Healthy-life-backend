@@ -5,6 +5,8 @@
 
  userRoute.post('/login',userController.userLogin)
  userRoute.post('/register',userController.register);
+ userRoute.post('/otp',userController.registerOtp);
+ 
 
 
  module.exports = userRoute;
