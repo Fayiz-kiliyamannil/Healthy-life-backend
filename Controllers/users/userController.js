@@ -1,11 +1,16 @@
 const user = require("../../Models/users/userModel")
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 
-//otp-gmail
+
+
+
+
+//otp-gmail  
 let email;
-let  otp;
+let otp;
 let password;
 let name
 let transporter = nodemailer.createTransport({
@@ -21,30 +26,28 @@ let transporter = nodemailer.createTransport({
 
 });
 
-const CallOtp = ()=>{
-  otp = Math.random();
-otp = otp * 1000000;
-otp = parseInt(otp);
-console.log(otp);
+const CallOtp = () => {
+    otp = Math.random();
+    otp = otp * 1000000;
+    otp = parseInt(otp);
+    console.log(otp);
 }
 
 
 
 //password bcrypt---------------------
-  
 
- const securePassword = async(password) =>{
+
+const securePassword = async (password) => {
     try {
-       
-       const passwordHash = await bcrypt.hash(password,10)
-       return passwordHash
-       console.log(passwordHash);
+
+        const passwordHash = await bcrypt.hash(password, 10)
+        return passwordHash
+        console.log(passwordHash);
     } catch (error) {
         console.error("securepassworderrorr.........");
     }
- }
-
-  
+}
 
 
 
@@ -53,12 +56,17 @@ const userLogin = async (req, res) => {
     try {
         const userData = await user.findOne({ email: req.body.email })
         if (userData) {
-             const comparePassword = await bcrypt.compare(req.body.password,userData.password)
+            const comparePassword = await bcrypt.compare(req.body.password, userData.password)
             if (comparePassword) {
                 if (userData.is_block) {
                     return res.status(200).send({ message: 'Your account is blocked', success: false })
                 } else {
-                    return res.status(200).send({ message: 'Login successful', success: true })
+                    // CREATE JWT TOKEN --------------------
+                    const token = jwt.sign({id: userData._id}, process.env.JWT_SECRET, {
+                        expiresIn: "1d",
+                    });
+
+                    return res.status(200).send({ message: 'Login successful', success: true, data: token })
                 }
             } else {
                 return res.status(200).send({ message: "Incorrect password", success: false })
@@ -66,9 +74,10 @@ const userLogin = async (req, res) => {
         } else {
             return res.status(200).send({ message: 'The email you entered does not exist.', success: false })
         }
-   
+
     } catch (error) {
-        console.error("error in login");
+        res.status(500).send({ message: "Error in Login", success: false, error })
+        console.error("error in login", error);
     }
 
 }
@@ -81,10 +90,10 @@ const register = async (req, res) => {
         } else {
             const passwordhash = await securePassword(req.body.password)
             email = req.body.email || email;
-             password = passwordhash || password,
-             name = req.body.name || name,
-            // send mail with defined transport object
-            CallOtp()
+            password = passwordhash || password,
+                name = req.body.name || name,
+                // send mail with defined transport object
+                CallOtp()
             var mailOptions = {
                 to: req.body.email || email,
                 subject: "Otp for registration is: ",
@@ -110,7 +119,7 @@ const register = async (req, res) => {
 
 
 
-    
+
 
 
 const registerOtp = async (req, res) => {
@@ -119,25 +128,52 @@ const registerOtp = async (req, res) => {
 
         if (req.body.Otp == otp) {
             const data = await user({
-                email:email,
-                password:password,
-                name:name
+                email: email,
+                password: password,
+                name: name
             })
             data.save();
 
-            return res.status(200).send({message:'Registration has been successfully completed ',success:true})
-            
+            return res.status(200).send({ message: 'Registration has been successfully completed ', success: true })
+
         } else {
-           return res.status(200).send({message:"Error! Incorrect OTP Entered",success:false})
+            return res.status(200).send({ message: "Error! Incorrect OTP Entered", success: false })
         }
     } catch (error) {
         console.log("otperror......");
     }
 }
 
+
+const userVarified = async (req, res) => {
+    try {
+
+
+        console.log(req.body.userId);
+        const users = await user.findOne({ _id: req.body.userId })
+      
+        if(users){
+              console.log(users.email);
+             return res.status(200).send({success:true,data:{
+                name:users.name,
+                email:users.email
+                
+            }})
+            
+        }else{
+            return res.status(200).send({message:"user does not exist",success:false})
+        }
+    } catch (error) {
+      return res.status(500).send({message:"error getting user info",success:false})
+    }
+}
+
+
+   
 module.exports = {
     register,
     userLogin,
     registerOtp,
-   
+    userVarified,
+
 }

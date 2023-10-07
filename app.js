@@ -1,19 +1,23 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
+require('dotenv').config()
 
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/healthy-life')
+mongoose.connect(process.env.MONGODB)
 .then(()=>console.log('mongodbConnected...'))
 .catch((error)=>console.error('error in MongoDB'))
 
 const app= express();
-dotenv.config();
 
 
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+
+app.use(express.json()); // Parse JSON bodies, if any
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+
 
 const userRoute = require('./Routes/userRoute');
 
