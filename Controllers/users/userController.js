@@ -6,8 +6,6 @@ const jwt = require('jsonwebtoken');
 
 
 
-
-
 //otp-gmail  
 let email;
 let otp;

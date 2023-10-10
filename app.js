@@ -20,10 +20,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 const userRoute = require('./Routes/userRoute');
-
+const adminRoute = require('./Routes/adminRoute')
 
 
 app.use("/user",userRoute);
+app.use('/admin',adminRoute)
             
 
 
