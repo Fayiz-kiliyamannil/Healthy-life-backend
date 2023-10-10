@@ -1,4 +1,5 @@
 const adminData = require('../../Models/admin/admin');
+const user = require('../../Models/users/userModel')
 const bcrypt = require('bcrypt');
 const jwt  = require('jsonwebtoken')
 
@@ -31,7 +32,21 @@ const  adminLogin = async(req,res)=>{
     }
 }
 
+const all_Trainees = async (req,res) =>{
+
+  try {
+    const userData = await user.find({})
+    console.log(userData);
+     res.status(200).send({userData,success:true})
+  } catch (error) {
+    res.status(500).send({message:"error in all_Trainees",succeess:false})
+    console.error(error);
+  }
+
+}
+
 
 module.exports = {
     adminLogin,
+    all_Trainees,
 }
