@@ -21,10 +21,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const userRoute = require('./Routes/userRoute');
 const adminRoute = require('./Routes/adminRoute')
-
+const trainerRoute = require('./Routes/trainerRoute');
 
 app.use("/user",userRoute);
-app.use('/admin',adminRoute)
+app.use('/admin',adminRoute);
+app.use('/trainer',trainerRoute); 
             
 
 

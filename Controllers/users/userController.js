@@ -125,7 +125,7 @@ const registerOtp = async (req, res) => {
         console.log(req.body.Otp);
 
         if (req.body.Otp == otp) {
-            const data = await user({
+            const data =  await user({
                 email: email,
                 password: password,
                 name: name

@@ -1,0 +1,70 @@
+const bcrypt = require ('bcrypt');
+const trainer = require('../../Models/trainer/trainerModel');
+const jwt = require('jsonwebtoken');
+
+const securePassword = async (password)=>{
+    try {
+        const passwordHash = await bcrypt.hash(password,10)
+        return passwordHash;
+
+    } catch (error) {
+        console.error("securepassword error");
+    }
+}
+
+const trainerRegister = async (req, res) => {
+    try {
+      const trainerExist = await trainer.findOne({ email: req.body.email });
+      if (trainerExist) {
+        res.status(200).send({ message: 'The Trainer already exists', success: false });
+      } else {
+        const  passwordhash =  await securePassword(req.body.password)
+        // console.log(passwordhash);
+        const data = new trainer({
+          email: req.body.email,
+          password: passwordhash,
+          name: req.body.name,
+          phone: req.body.phone,
+        });
+        await data.save();
+        res.status(200).send({ message: 'Trainer registration is successful', success: true });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: 'Error in trainerRegister', success: false });
+    }
+  };
+
+
+   const trainerLogin = async (req,res)=>{
+    try {
+        const trainerData = await trainer.findOne({email:req.body.email});
+        if(trainerData){
+          const is_Match = await bcrypt.compare(req.body.password,trainerData.password)
+          if(is_Match){
+             if(trainerData.is_block){
+                 return  res.status(200).send({message:'Account is blocked',success:false})
+             }else{
+            const trainerToken = jwt.sign({id:trainerData._id},process.env.JWT_SECRET,{
+                expiresIn:'1d',
+            })
+            return res.status(200).send({message:'Login successfull',success:true,data:trainerToken })
+        }
+           
+          }else{
+            return res.status(200).send({message:'Incorrect password',success:false})
+          }
+        }else{
+            return res.status(200).send({message:" Trainer not exist ",success:false})
+        }    
+    } catch (error) {
+        res.status(500).send({message:"error in trainer login" ,success:false})
+        console.error(error);
+    }
+   }
+
+
+module.exports = {
+trainerRegister,
+trainerLogin,
+}
