@@ -1,5 +1,5 @@
 const bcrypt = require ('bcrypt');
-const trainer = require('../../Models/trainer/trainerModel');
+const trainer = require('../../Models/trainerModel');
 const jwt = require('jsonwebtoken');
 
 const securePassword = async (password)=>{
@@ -45,10 +45,16 @@ const trainerRegister = async (req, res) => {
              if(trainerData.is_block){
                  return  res.status(200).send({message:'Account is blocked',success:false})
              }else{
-            const trainerToken = jwt.sign({id:trainerData._id},process.env.JWT_SECRET,{
-                expiresIn:'1d',
-            })
-            return res.status(200).send({message:'Login successfull',success:true,data:trainerToken })
+              if(trainerData.is_verified){
+                const trainerToken = jwt.sign({id:trainerData._id},process.env.JWT_SECRET,{
+                  expiresIn:'1d',
+              })
+              return res.status(200).send({message:'Login successfull',success:true,data:trainerToken })
+              }else{
+                return  res.status(200).send({message:'Not varified account',success:false})
+                
+              }
+            
         }
            
           }else{
