@@ -1,9 +1,37 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    name:{
+    firstname:{
         type:String,
         require:true
+    },
+    trainer:{
+        type:String,
+        require:false,
+    },
+    lastname:{
+        type:String,
+        require:false,
+    },
+    age:{
+      type:String,
+      require:false,
+    },
+    height:{
+        type:String,
+        require:false,
+    },
+    weight:{
+        type:String,
+        require:false,
+    },
+    about:{
+        type:String,
+        require:false,
+    },
+    gender:{
+        type:String,
+        require:false,
     },
     email:{
         type:String,
@@ -13,7 +41,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         require:false
     },
-    profileImage:{
+    profile:{
       type:String,
       require:false
     },
@@ -26,6 +54,7 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:false,
     }
+
 },{
     timestamps:true
 })

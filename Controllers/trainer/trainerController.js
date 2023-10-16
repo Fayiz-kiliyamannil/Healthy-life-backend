@@ -15,9 +15,13 @@ const securePassword = async (password)=>{
 const trainerRegister = async (req, res) => {
     try {
       const trainerExist = await trainer.findOne({ email: req.body.email });
+       const username  = await trainer.findOne({name:req.body.name})
       if (trainerExist) {
         res.status(200).send({ message: 'The Trainer already exists', success: false });
-      } else {
+      } else if(username){
+        res.status(200).send({ message: 'The Trainer Name already exists', success: false });
+
+      }else {
         const  passwordhash =  await securePassword(req.body.password)
         // console.log(passwordhash);
         const data = new trainer({

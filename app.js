@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config()
-
+const path = require('path')
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB)
@@ -15,7 +15,7 @@ const app= express();
 app.use(express.json()); // Parse JSON bodies, if any
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 

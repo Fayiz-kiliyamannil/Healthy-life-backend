@@ -1,4 +1,5 @@
 const user = require("../../Models/userModel")
+const trainers = require('../../Models/trainerModel')
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -60,10 +61,10 @@ const userLogin = async (req, res) => {
                     return res.status(200).send({ message: 'Your account is blocked', success: false })
                 } else {
                     // CREATE JWT TOKEN --------------------
-                    const token = jwt.sign({id: userData._id}, process.env.JWT_SECRET, {
+                    const token = jwt.sign({ id: userData._id }, process.env.JWT_SECRET, {
                         expiresIn: "1d",
                     });
-
+                           
                     return res.status(200).send({ message: 'Login successful', success: true, data: token })
                 }
             } else {
@@ -85,7 +86,12 @@ const register = async (req, res) => {
         const userExist = await user.findOne({ email: req.body.email })
         if (userExist) {
             return res.status(200).send({ message: 'The user already exists', success: false })
-        } else {
+            
+        }else if(req.body.password !== req.body.repassword){
+         return res.status(200).send({message:'Password do not match.',success:false})
+        }
+        
+        else {
             const passwordhash = await securePassword(req.body.password)
             email = req.body.email || email;
             password = passwordhash || password,
@@ -125,10 +131,10 @@ const registerOtp = async (req, res) => {
         console.log(req.body.Otp);
 
         if (req.body.Otp == otp) {
-            const data =  await user({
+            const data = await user({
                 email: email,
                 password: password,
-                name: name
+                firstname: name
             })
             data.save();
 
@@ -145,33 +151,35 @@ const registerOtp = async (req, res) => {
 
 const userVarified = async (req, res) => {
     try {
-
-
-        console.log(req.body.userId);
         const users = await user.findOne({ _id: req.body.userId })
-      
-        if(users){
-              console.log(users.email);
-             return res.status(200).send({success:true,data:{
-                name:users.name,
-                email:users.email
-                
-            }})
-            
-        }else{
-            return res.status(200).send({message:"user does not exist",success:false})
+
+        if (users) { 
+            return res.status(200).send({ success: true, data:users})
+        } else {
+            return res.status(200).send({ message: "user does not exist", success: false })
         }
     } catch (error) {
-      return res.status(500).send({message:"error getting user info",success:false})
+        return res.status(500).send({ message: "error getting user info", success: false })
     }
 }
 
 
-   
+const get_Traienrs = async (req, res) => {
+    try {
+        const trainersData = await trainers.find({});
+        return res.status(200).send({message:"get-trainers-info",success:true,trainers:trainersData})
+    } catch (error) {
+        res.status(500).send({ message: "error in get_trainers", success: false })
+        console.error(error);
+    }
+}
+
+
 module.exports = {
     register,
     userLogin,
     registerOtp,
     userVarified,
+    get_Traienrs,
 
 }
