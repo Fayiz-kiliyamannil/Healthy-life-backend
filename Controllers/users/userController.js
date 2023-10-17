@@ -167,7 +167,8 @@ const userVarified = async (req, res) => {
 const get_Traienrs = async (req, res) => {
     try {
         const trainersData = await trainers.find({});
-        return res.status(200).send({message:"get-trainers-info",success:true,trainers:trainersData})
+        const fourTrainer = await trainers.find({}).limit(4)
+        return res.status(200).send({message:"get-trainers-info",success:true,trainers:trainersData ,trainer:fourTrainer})
     } catch (error) {
         res.status(500).send({ message: "error in get_trainers", success: false })
         console.error(error);

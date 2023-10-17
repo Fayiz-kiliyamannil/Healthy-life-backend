@@ -1,40 +1,67 @@
 const mongoose = require('mongoose');
 
 const trainerSchema = mongoose.Schema({
-    name:{
-        type:String,
-        require:true,
+    firstname: {
+        type: String,
+        require: true,
     },
-    email:{
-        type:String,
-        require:true,
+    lastname: {
+        type: String,
+        require: false,
     },
-    password:{
-        type:String,
-        require:true
+    age: {
+        type: String,
+        require: false,
     },
-    phone:{
-        type:String,
-        require:true
+    height: {
+        type: String,
+        require: false,
     },
-    profile:{
-        type:String,
-        require:false
+    weight: {
+        type: String,
+        require: false,
     },
-    is_block:{
-        type:Boolean,
-        default:false
+    about: {
+        type: String,
+        require: false,
     },
-    is_verified:{
-        type:Boolean,
-        default:false,
+    gender: {
+        type: String,
+        require: false,
     },
-     adress:{
-        type:String,
-     },
+    email: {
+        type: String,
+        require: true,
+    },
+    password: {
+        type: String,
+        require: true
+    },
+    phone: {
+        type: String,
+        require: true
+    },
+    profile: {
+        type: String,
+        require: false
+    },
+    is_block: {
+        type: Boolean,
+        default: false
+    },
+    is_verified: {
+        type: Boolean,
+        default: false,
+    },
+    adress: {
+        type: String,
+    },
 
-},{
-    timestamps:true
+
+
+
+}, {
+    timestamps: true
 })
 
-module.exports = mongoose.model('trainer',trainerSchema);
+module.exports = mongoose.model('trainer', trainerSchema);

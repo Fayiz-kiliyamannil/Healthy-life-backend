@@ -3,7 +3,9 @@ const multer = require('multer');
 const path = require ('path');
 const app = express();
 // Define storage for multer (file uploads)
-const storage = multer.diskStorage({
+
+try {
+  const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, path.join(__dirname,'../public/profileImage'))
     },
@@ -13,9 +15,16 @@ const storage = multer.diskStorage({
   });  
      
    const upload = multer({ storage: storage });
-  
 
-module.exports = {
+   module.exports = {
     storage,
     upload,
 }
+  
+} catch (error) {
+
+  console.error(error,'in multer middleware');
+}
+
+  
+

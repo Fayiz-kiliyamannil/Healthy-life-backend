@@ -16,6 +16,9 @@ const updateProfile = async (req, res) => {
             weight: req.body.weight,
             height: req.body.height,
         }})
+
+         if(!req.file.filename)  return res.status(200).send({ message: 'profile Image is not selected', success:false })
+
         return res.status(200).send({ message: 'Update your Profile', success:true })
     } catch (error) {
         res.status(500).send({ message: 'error in update profile', success: false })

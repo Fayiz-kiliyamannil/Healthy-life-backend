@@ -56,11 +56,8 @@ const trainerRegister = async (req, res) => {
               return res.status(200).send({message:'Login successfull',success:true,data:trainerToken })
               }else{
                 return  res.status(200).send({message:'Not varified account',success:false})
-                
               }
-            
         }
-           
           }else{
             return res.status(200).send({message:'Incorrect password',success:false})
           }
@@ -74,7 +71,43 @@ const trainerRegister = async (req, res) => {
    }
 
 
+     const trainerProfile = async(req,res)=>{
+      try {
+        const trainerData  = await trainer.findOne({_id:req.body.userId})
+        return res.status(200).send({message:'get-Traier-data',success:true,trainer:trainerData})
+      } catch (error) {
+        res.status(500).send({message:'error in trainerProfile',success:false})
+        console.error(error);
+      }
+     }      
+     
+     const trainerEditProfile =  async (req,res)=>{
+      try {
+          await trainer.findByIdAndUpdate({_id:req.body._id},{$set:{
+            firstname:req.body.firstname,
+            lastname:req.body.lastname,
+            profile:req.file.filename,
+            phone:req.body.phone,
+            about:req.body.about,  
+            gender:req.body.gender,
+            age:req.body.age,  
+            weight:req.body.weight,
+            height :req.body.height,  
+          }
+        
+          })
+          return res.status(200).send({message:'Trainer Profile updated',success:true})
+
+      } catch (error) {
+        res.status(500).send({message:error,success:false})
+        console.error(error);
+      }
+     }
+
+
 module.exports = {
 trainerRegister,
 trainerLogin,
-}
+trainerProfile,
+trainerEditProfile,
+}  

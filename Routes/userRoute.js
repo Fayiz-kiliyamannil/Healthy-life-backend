@@ -17,5 +17,5 @@ const multer = require('../Middlewares/multer')
  userRoute.post('/profile',authMiddlewares,profileController.getProfile)
     
  
-  
+   
  module.exports = userRoute;
