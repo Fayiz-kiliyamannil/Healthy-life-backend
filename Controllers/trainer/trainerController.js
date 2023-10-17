@@ -27,7 +27,7 @@ const trainerRegister = async (req, res) => {
         const data = new trainer({
           email: req.body.email,
           password: passwordhash,
-          name: req.body.name,
+          firstname: req.body.name,
           phone: req.body.phone,
         });
         await data.save();
