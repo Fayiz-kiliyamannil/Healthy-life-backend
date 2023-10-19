@@ -3,6 +3,7 @@
  const userController = require('../Controllers/users/userController');
  const authMiddlewares   = require('../Middlewares/authMiddlewares');
 const profileController  = require('../Controllers/users/profileController');
+const blogController = require('../Controllers/users/userBlogConroller')
 const multer = require('../Middlewares/multer')
  
 
@@ -14,7 +15,8 @@ const multer = require('../Middlewares/multer')
  userRoute.post('/user-profile-update-info', multer.upload.single('profile'), profileController.updateProfile);
  userRoute.post('/get-user-info',profileController.getUser);
  userRoute.get('/get-trainer-info',profileController.getTrainer);
- userRoute.post('/profile',authMiddlewares,profileController.getProfile)
+ userRoute.post('/profile',authMiddlewares,profileController.getProfile);
+ userRoute.get('/get-user-blog-info',blogController.getUserBlog);
     
  
    

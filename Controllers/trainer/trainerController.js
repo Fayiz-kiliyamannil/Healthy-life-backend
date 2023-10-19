@@ -90,6 +90,7 @@ const trainerRegister = async (req, res) => {
             phone:req.body.phone,
             about:req.body.about,  
             gender:req.body.gender,
+            specilized:req.body.specilized,
             age:req.body.age,  
             weight:req.body.weight,
             height :req.body.height,  
