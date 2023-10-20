@@ -13,8 +13,20 @@ const getUserBlog = async (req,res)=>{
         console.error(error);
     }
 }
+
+const getBlogDetails = async (req,res)=>{
+    try {
+       const  blogData = await blog.findOne({_id:req.body.blogId}).populate('trainerId')  
+        return res.status(200).send({message:'get-blog-details',success:true,blog:blogData})
+    } catch (error) {
+        res.status(500).send({message:'error in getUserBlogDetails',success:false,error})
+        console.error(error);
+    }
+}
+
   
 
 module.exports ={
     getUserBlog,
+getBlogDetails,
 }

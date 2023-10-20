@@ -3,8 +3,7 @@ const trainers = require('../../Models/trainerModel')
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
-
+const contact = require('../../Models/contact')
 
 
 //otp-gmail  
@@ -166,11 +165,26 @@ const userVarified = async (req, res) => {
 
 const get_Traienrs = async (req, res) => {
     try {
-        const trainersData = await trainers.find({});
-        const fourTrainer = await trainers.find({}).limit(4)
+        const trainersData = await trainers.find({is_block:false});
+        const fourTrainer = await trainers.find({is_block:false}).limit(4)
         return res.status(200).send({message:"get-trainers-info",success:true,trainers:trainersData ,trainer:fourTrainer})
     } catch (error) {
         res.status(500).send({ message: "error in get_trainers", success: false })
+        console.error(error);
+    }
+}
+
+const contactDetails = async(req,res)=>{
+    try {
+       console.log(req.body);
+       await contact.create({
+        name:req.body.name,
+        email:req.body.email,
+        message:req.body.message
+       })
+       return res.status(200).send({message:'Your message sent' ,success:true})
+    } catch (error) {
+        res.status(500).send({ message: "error in contact details", success: false })
         console.error(error);
     }
 }
@@ -182,5 +196,6 @@ module.exports = {
     registerOtp,
     userVarified,
     get_Traienrs,
+    contactDetails,
 
 }

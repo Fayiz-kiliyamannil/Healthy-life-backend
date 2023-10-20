@@ -17,7 +17,8 @@ const multer = require('../Middlewares/multer')
  userRoute.get('/get-trainer-info',profileController.getTrainer);
  userRoute.post('/profile',authMiddlewares,profileController.getProfile);
  userRoute.get('/get-user-blog-info',blogController.getUserBlog);
-    
+ userRoute.post('/get-blog-details',authMiddlewares,blogController.getBlogDetails);
+ userRoute.post('/contact-info',userController.contactDetails);
  
    
  module.exports = userRoute;
