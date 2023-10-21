@@ -15,10 +15,12 @@ const multer = require('../Middlewares/multer')
  userRoute.post('/user-profile-update-info', multer.upload.single('profile'), profileController.updateProfile);
  userRoute.post('/get-user-info',profileController.getUser);
  userRoute.get('/get-trainer-info',profileController.getTrainer);
+ userRoute.post('/get-trainers-details',profileController.getTrainerProfile)
  userRoute.post('/profile',authMiddlewares,profileController.getProfile);
  userRoute.get('/get-user-blog-info',blogController.getUserBlog);
  userRoute.post('/get-blog-details',authMiddlewares,blogController.getBlogDetails);
  userRoute.post('/contact-info',userController.contactDetails);
+
  
    
  module.exports = userRoute;

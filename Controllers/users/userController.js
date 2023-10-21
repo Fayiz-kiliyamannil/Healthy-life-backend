@@ -162,17 +162,19 @@ const userVarified = async (req, res) => {
     }
 }
 
-
+//---------------------------------get trainer ----------------------------------------
 const get_Traienrs = async (req, res) => {
     try {
-        const trainersData = await trainers.find({is_block:false});
-        const fourTrainer = await trainers.find({is_block:false}).limit(4)
+        const trainersData = await trainers.find({is_block:false,is_verified:true});
+        const fourTrainer = await trainers.find({is_block:false,is_verified:true}).limit(4)
+
         return res.status(200).send({message:"get-trainers-info",success:true,trainers:trainersData ,trainer:fourTrainer})
     } catch (error) {
         res.status(500).send({ message: "error in get_trainers", success: false })
         console.error(error);
     }
 }
+
 
 const contactDetails = async(req,res)=>{
     try {

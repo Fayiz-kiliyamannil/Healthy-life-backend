@@ -6,8 +6,7 @@ const userSchema = new mongoose.Schema({
         require:true
     },
     trainer:{
-        type:String,
-        require:false,
+        type:mongoose.Schema.Types.ObjectId,ref:'trainer',
     },
     lastname:{
         type:String,
