@@ -14,38 +14,6 @@ const allTrainerDetails = async (req, res) => {
   }
 };
 
-const blockTrainer = async (req, res) => {
-  try {
-    await trainer.updateOne({ _id: req.body.trainerId }, { is_block: true });
-    const trainerData = await trainer.find({ is_verified: true }).lean();
-    return res.status(200).send({
-      message: `blocked Trainer `,
-      success: true,
-      trainer: trainerData,
-    });
-  } catch (error) {
-    res.status(500).send({ message: "error in block-Trainer", success: false });
-    console.log(error);
-  }
-};
-
-const unBlockTrainer = async (req, res) => {
-  try {
-    await trainer.updateOne({ _id: req.body.trainerId }, { is_block: false });
-    const trainerData = await trainer.find({ is_verified: true }).lean();
-    return res.status(200).send({
-      message: `unblock Trainer `,
-      success: true,
-      trainer: trainerData,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .send({ message: "error in  unblock-Trainer", success: false });
-    console.error(error);
-  }
-};
-
 //--------------------------GET NEW TRAINER DATA---------------------
 const newTrainers = async (req, res) => {
   try {
@@ -146,8 +114,6 @@ const trainerBlockUnblock = async(req,res)=>{
 
 module.exports = {
   allTrainerDetails,
-  blockTrainer,
-  unBlockTrainer,
   newTrainers,
   confirmTrainer,
   deleteTrainer,

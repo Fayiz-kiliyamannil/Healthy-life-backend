@@ -50,7 +50,7 @@ const securePassword = async (password) => {
 
 
 
-const userLogin = async (req, res) => {
+const userLogin = async (req, res,next) => {
     try {
         const userData = await user.findOne({ email: req.body.email })
         if (userData) {
@@ -74,13 +74,12 @@ const userLogin = async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).send({ message: "Error in Login", success: false, error })
-        console.error("error in login", error);
+        next(error)
     }
 
 }
 
-const register = async (req, res) => {
+const register = async (req, res,next) => {
     try {
         const userExist = await user.findOne({ email: req.body.email })
         if (userExist) {
@@ -115,7 +114,7 @@ const register = async (req, res) => {
 
         }
     } catch (error) {
-        console.log("error in register........");
+       next(error)
     }
 }
 //RESEND OTP-----------------------
@@ -125,7 +124,7 @@ const register = async (req, res) => {
 
 
 
-const registerOtp = async (req, res) => {
+const registerOtp = async (req, res,next) => {
     try {
         console.log(req.body.Otp);
 
@@ -143,12 +142,12 @@ const registerOtp = async (req, res) => {
             return res.status(200).send({ message: "Error! Incorrect OTP Entered", success: false })
         }
     } catch (error) {
-        console.log("otperror......");
+       next(error)
     }
 }
 
 
-const userVarified = async (req, res) => {
+const userVarified = async (req, res,next) => {
     try {
         const users = await user.findOne({ _id: req.body.userId })
 
@@ -158,27 +157,26 @@ const userVarified = async (req, res) => {
             return res.status(200).send({ message: "user does not exist", success: false })
         }
     } catch (error) {
-        return res.status(500).send({ message: "error getting user info", success: false })
+         next(error)
     }
 }
 
 //---------------------------------get trainer ----------------------------------------
-const get_Traienrs = async (req, res) => {
+const get_Traienrs = async (req,res,next) => {
     try {
         const trainersData = await trainers.find({is_block:false,is_verified:true});
         const fourTrainer = await trainers.find({is_block:false,is_verified:true}).limit(4)
 
         return res.status(200).send({message:"get-trainers-info",success:true,trainers:trainersData ,trainer:fourTrainer})
     } catch (error) {
-        res.status(500).send({ message: "error in get_trainers", success: false })
-        console.error(error);
+       next(error)
     }
 }
 
-
-const contactDetails = async(req,res)=>{
+// ------------------------ here the render the contact page ---------------------
+const contactDetails = async(req,res,next)=>{
     try {
-       console.log(req.body);
+   
        await contact.create({
         name:req.body.name,
         email:req.body.email,
@@ -186,8 +184,8 @@ const contactDetails = async(req,res)=>{
        })
        return res.status(200).send({message:'Your message sent' ,success:true})
     } catch (error) {
-        res.status(500).send({ message: "error in contact details", success: false })
-        console.error(error);
+        next(error)
+      
     }
 }
 

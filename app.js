@@ -22,14 +22,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 const userRoute = require('./Routes/userRoute');
 const adminRoute = require('./Routes/adminRoute')
 const trainerRoute = require('./Routes/trainerRoute');
+const errorHandler = require('./Middlewares/errorHandler');
 
 app.use("/user",userRoute);
 app.use('/admin',adminRoute);
 app.use('/trainer',trainerRoute); 
-            
+ 
 
 
-
+app.use(errorHandler)
 const port  = process.env.PORT || 5001;
 app.listen(port,()=>{
     console.log(`Listening on port ${port}`);
