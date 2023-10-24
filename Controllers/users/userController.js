@@ -32,10 +32,18 @@ const CallOtp = () => {
 }
 
 
+//--------------    GET HOME ---------
+const getHome = async(req,res,next) =>{
+    try {
+        const fourTrainer = await trainers.find({is_block:false,is_verified:true}).limit(4)
+        return res.status(200).send({message:"get-trainers-info",success:true,trainer:fourTrainer})
+    } catch (error) {
+        next(error)
+    }
+}
+
 
 //password bcrypt---------------------
-
-
 const securePassword = async (password) => {
     try {
 
@@ -197,5 +205,6 @@ module.exports = {
     userVarified,
     get_Traienrs,
     contactDetails,
+    getHome,
 
 }

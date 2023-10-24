@@ -1,6 +1,8 @@
 
 const User = require('../../Models/userModel');
-const Trainer = require('../../Models/trainerModel')
+const Trainer = require('../../Models/trainerModel');
+const mongooss = require('mongoose');
+const {ObjectId} = mongooss.Types
 
 //---------------------------------------------USER UPDATE THE PROFILE---------------------------
 
@@ -31,8 +33,7 @@ const updateProfile = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
     try {
-        console.log(req.body.userId);
-        const userData = await User.findOne({ _id: req.body.userId });
+        const userData = await User.findOne({ _id: req.body.userId }).populate('trainer');
         return res.status(200).send({ message: 'get-user-data', success: true, user: userData });
     } catch (error) {
         next(error)
@@ -52,11 +53,9 @@ const getTrainer = async (req, res, next) => {
 //----------------------   GET TRAINERS PROFILE ------------------------------------
 const getTrainerProfile = async (req, res, next) => {
     try {
-        console.log('---------------------------------', req.body);
-        const trainerInfo = await Trainer.findOne({ _id: req.body.id })
-        console.log(trainerInfo);
-        return res.status(200).send({ message: "get-trainer-details success", success: true, trainer: trainerInfo })
+            return res.status(200).send({ message: "get-trainer-details success", success: true, trainer: trainerInfo })
     } catch (error) {
+        console.error(error.message);
         next(error)
     }
 }
@@ -75,8 +74,8 @@ const getProfile = async (req, res, next) => {
 module.exports = {
     updateProfile,
     getUser,
-    getTrainer,
     getProfile,
     getTrainerProfile,
+    getTrainer,
 
 }

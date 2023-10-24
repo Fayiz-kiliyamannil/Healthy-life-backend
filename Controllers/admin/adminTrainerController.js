@@ -3,14 +3,13 @@ const trainer = require("../../Models/trainerModel");
 const allTrainerDetails = async (req, res) => {
   try {
     const trainerData = await trainer.find({ is_verified: true }).lean();
-    console.log(trainerData);
     return res.status(200).send({
       message: "fetch  all-trainer data",
       success: true,
       trainer: trainerData,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 

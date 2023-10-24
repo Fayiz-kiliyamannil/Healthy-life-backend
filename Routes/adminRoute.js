@@ -3,17 +3,19 @@ const adminRoute = express();
 const adminController = require('../Controllers/admin/adminController');
 const  trainerController = require('../Controllers/admin/adminTrainerController');
 const traineeController = require ('../Controllers/admin/adminTraineeController')
+const authMiddleware = require ('../Middlewares/authMiddlewares');
+
 
 adminRoute.post('/login',adminController.adminLogin)
-adminRoute.get('/trainees',adminController.all_Trainees);
-adminRoute.get('/trainers',trainerController.allTrainerDetails);
-adminRoute.get('/newtrainers',trainerController.newTrainers);
-adminRoute.post('/confirm-trainer',trainerController.confirmTrainer);
-adminRoute.post('/delete-trainer',trainerController.deleteTrainer);
-adminRoute.post('/trainee-details',traineeController .traineeDetails);
-adminRoute.post('/trainee-action',traineeController.userBlockUnblock);
-adminRoute.post('/trainer-action',trainerController.trainerBlockUnblock);
-adminRoute.post('/get-trainer-info',trainerController.trainersDetails)
+adminRoute.get('/trainees',authMiddleware,adminController.all_Trainees);
+adminRoute.get('/trainers',authMiddleware,trainerController.allTrainerDetails);
+adminRoute.get('/newtrainers',authMiddleware,trainerController.newTrainers);
+adminRoute.post('/confirm-trainer',authMiddleware,trainerController.confirmTrainer);
+adminRoute.post('/delete-trainer',authMiddleware,trainerController.deleteTrainer);
+adminRoute.post('/trainee-details',authMiddleware,traineeController .traineeDetails);
+adminRoute.post('/trainee-action',authMiddleware,traineeController.userBlockUnblock);
+adminRoute.post('/trainer-action',authMiddleware,trainerController.trainerBlockUnblock);
+adminRoute.post('/get-trainer-info',authMiddleware,trainerController.trainersDetails)
 
 
 module.exports = adminRoute;
