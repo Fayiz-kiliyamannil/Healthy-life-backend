@@ -113,6 +113,33 @@ const trainerProfile = async (req, res) => {
 
 const trainerEditProfile = async (req, res) => {
   try {
+  
+const trainerInfo = await trainer.findOne({_id:req.body._id})
+
+ if(!req.file){
+  if(!trainerInfo.profile){
+  
+    return res.status(200).send({message:'Profile Image Required',success:false})
+    
+  }else{
+      await trainer.findByIdAndUpdate(
+      { _id: req.body._id },
+      {
+        $set: {
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          phone: req.body.phone,
+          about: req.body.about,
+          gender: req.body.gender,
+          specilized: req.body.specilized,
+          age: req.body.age,
+          weight: req.body.weight,
+          height: req.body.height,
+        },
+      }
+    )
+  }
+  }else{
     await trainer.findByIdAndUpdate(
       { _id: req.body._id },
       {
@@ -130,12 +157,13 @@ const trainerEditProfile = async (req, res) => {
         },
       }
     );
+  }
     return res
       .status(200)
       .send({ message: "Trainer Profile updated", success: true });
   } catch (error) {
     res.status(500).send({ message: error, success: false });
-    console.error(error);
+    console.error(error.message);
   }
 };
 

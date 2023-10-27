@@ -184,7 +184,6 @@ const get_Traienrs = async (req,res,next) => {
 // ------------------------ here the render the contact page ---------------------
 const contactDetails = async(req,res,next)=>{
     try {
-   
        await contact.create({
         name:req.body.name,
         email:req.body.email,

@@ -8,7 +8,30 @@ const {ObjectId} = mongooss.Types
 
 const updateProfile = async (req, res, next) => {
     try {
-        const traienrInfo = await Trainer.findOne({ firstname: req.body.trainer })
+        const trainerName = req.body.trainer.firstname || req.body.trainer;
+        const traienrInfo = await Trainer.findOne({ firstname:trainerName})
+      const userInfo = await User.findOne({_id:req.body._id}).lean()
+     
+        if(!req.file){
+    
+             if(!userInfo.profile){
+                
+                return res.status(200).send({message:'Profile Image Required',success:false})
+             }
+            await User.findByIdAndUpdate({ _id: req.body._id }, {
+                $set: {
+                    lastname: req.body.lastname,
+                    phone: req.body.phone,
+                    trainer: traienrInfo._id,
+                    about: req.body.about,
+                    gender: req.body.gender,
+                    age: req.body.age,
+                    weight: req.body.weight,
+                    height: req.body.height,
+                }
+            })
+            return res.status(200).send({ message: 'Update your Profile', success: true })
+        }else{
         await User.findByIdAndUpdate({ _id: req.body._id }, {
             $set: {
                 lastname: req.body.lastname,
@@ -22,10 +45,8 @@ const updateProfile = async (req, res, next) => {
                 height: req.body.height,
             }
         })
-
-        if (!req.file.filename) return res.status(200).send({ message: 'profile Image is not selected', success: false })
-
         return res.status(200).send({ message: 'Update your Profile', success: true })
+    }
     } catch (error) {
         next(error)
     }
