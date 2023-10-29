@@ -13,5 +13,8 @@ trainerRoute.post('/trainer-profile-edit',multer.upload.single('profile'),traine
 trainerRoute.post ('/trainer-upload-blog',multer.upload.single('blogImg'),blogController.UploadBlog)
 trainerRoute.post('/get-trainee-info',authMiddleware,trainerController.getTrainees);
 trainerRoute.post('/trainee-details',authMiddleware,trainerController.getTraineeDetails);
-
-module.exports = trainerRoute;  
+trainerRoute.post('/trainer-blog',authMiddleware,blogController.trainerBlog);
+trainerRoute.post('/delete-blog',authMiddleware,blogController.deleteBlog);
+trainerRoute.post('/edit-blog',authMiddleware,blogController.blogDetails);
+trainerRoute.post('/trainer-Edit-blog',multer.upload.single('blogImg'),blogController.editBlog)
+module.exports = trainerRoute;    
