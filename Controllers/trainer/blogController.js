@@ -40,7 +40,6 @@ const trainerBlog = async (req, res) => {
   try {
     const { trainerId } = req.body
     const trainerBlog = await blog.find({ trainerId: trainerId }).sort({ createdAt: -1 })
-    console.log(trainerBlog);
     if (trainerBlog) {
       return res.status(200).send({ message: 'fetch-trainer-blog', success: true, trainerBlog })
     } else {

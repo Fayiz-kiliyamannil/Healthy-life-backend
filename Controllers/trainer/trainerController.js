@@ -113,51 +113,51 @@ const trainerProfile = async (req, res) => {
 
 const trainerEditProfile = async (req, res) => {
   try {
-  
-const trainerInfo = await trainer.findOne({_id:req.body._id})
 
- if(!req.file){
-  if(!trainerInfo.profile){
-  
-    return res.status(200).send({message:'Profile Image Required',success:false})
-    
-  }else{
+    const trainerInfo = await trainer.findOne({ _id: req.body._id })
+
+    if (!req.file) {
+      if (!trainerInfo.profile) {
+
+        return res.status(200).send({ message: 'Profile Image Required', success: false })
+
+      } else {
+        await trainer.findByIdAndUpdate(
+          { _id: req.body._id },
+          {
+            $set: {
+              firstname: req.body.firstname,
+              lastname: req.body.lastname,
+              phone: req.body.phone,
+              about: req.body.about,
+              gender: req.body.gender,
+              specilized: req.body.specilized,
+              age: req.body.age,
+              weight: req.body.weight,
+              height: req.body.height,
+            },
+          }
+        )
+      }
+    } else {
       await trainer.findByIdAndUpdate(
-      { _id: req.body._id },
-      {
-        $set: {
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          phone: req.body.phone,
-          about: req.body.about,
-          gender: req.body.gender,
-          specilized: req.body.specilized,
-          age: req.body.age,
-          weight: req.body.weight,
-          height: req.body.height,
-        },
-      }
-    )
-  }
-  }else{
-    await trainer.findByIdAndUpdate(
-      { _id: req.body._id },
-      {
-        $set: {
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          profile: req.file.filename,
-          phone: req.body.phone,
-          about: req.body.about,
-          gender: req.body.gender,
-          specilized: req.body.specilized,
-          age: req.body.age,
-          weight: req.body.weight,
-          height: req.body.height,
-        },
-      }
-    );
-  }
+        { _id: req.body._id },
+        {
+          $set: {
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            profile: req.file.filename,
+            phone: req.body.phone,
+            about: req.body.about,
+            gender: req.body.gender,
+            specilized: req.body.specilized,
+            age: req.body.age,
+            weight: req.body.weight,
+            height: req.body.height,
+          },
+        }
+      );
+    }
     return res
       .status(200)
       .send({ message: "Trainer Profile updated", success: true });
@@ -201,6 +201,32 @@ const getTraineeDetails = async (req, res) => {
 };
 
 
+//--------------------------TRAINER-CAN-UPDATE TRAINEE DIET PLAN-----------------------
+const updateDietPlan = async (req, res) => {
+  try {
+    const { _id, targetWeight, dailyCaloriegoal, proteinIntake, carbohydrateAndTatintake,
+      mealPlanCreation, waterIntake, dietaryGoals, nutritionalAnalysis, supplementTracking } = req.body.dietPlan;
+    await trainee.findByIdAndUpdate({ _id }, {
+      $set: {
+        targetWeight,
+        dailyCaloriegoal,
+        proteinIntake,
+        waterIntake,
+        carbohydrateAndTatintake,  
+        mealPlanCreation,
+        dietaryGoals,
+        nutritionalAnalysis,
+        supplementTracking,
+      }
+    })
+    const traineeinfo = await trainee.findOne({ _id: _id}).lean()
+    return res.status(200).send({ message: 'New Diet-Plan Updated', success: true, trainee: traineeinfo })
+  } catch (error) {
+    res.status(500).send({ message: error, success: false });
+    console.error(error);
+  }
+}
+
 
 module.exports = {
   trainerRegister,
@@ -208,5 +234,6 @@ module.exports = {
   trainerProfile,
   trainerEditProfile,
   getTraineeDetails,
-  getTrainees
+  getTrainees,
+  updateDietPlan,
 };

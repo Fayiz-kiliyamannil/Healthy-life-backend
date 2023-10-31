@@ -16,5 +16,6 @@ trainerRoute.post('/trainee-details',authMiddleware,trainerController.getTrainee
 trainerRoute.post('/trainer-blog',authMiddleware,blogController.trainerBlog);
 trainerRoute.post('/delete-blog',authMiddleware,blogController.deleteBlog);
 trainerRoute.post('/edit-blog',authMiddleware,blogController.blogDetails);
-trainerRoute.post('/trainer-Edit-blog',multer.upload.single('blogImg'),blogController.editBlog)
+trainerRoute.post('/trainer-Edit-blog',multer.upload.single('blogImg'),blogController.editBlog);
+ trainerRoute.post('/trainee-dietPlan-update',authMiddleware,trainerController.updateDietPlan);
 module.exports = trainerRoute;    

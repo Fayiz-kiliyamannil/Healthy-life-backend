@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         require: false
     },
-
     password: {
         type: String,
         require: true,
@@ -56,7 +55,34 @@ const userSchema = new mongoose.Schema({
     is_block: {
         type: Boolean,
         default: false,
-    }
+    },
+    targetWeight: {
+        type: String,
+    },
+    dailyCaloriegoal: {
+        type: String,
+    },
+    proteinIntake: {
+        type: String,
+    },
+    waterIntake: {
+        type: String,
+    },
+    carbohydrateAndTatintake: {
+        type: String,
+    },
+    mealPlanCreation: {
+        type: String,
+    },
+    dietaryGoals: {
+        type: String,
+    },
+    nutritionalAnalysis: {
+        type: String,
+    },
+    supplementTracking: {
+        type: String,
+    },
 
 }, {
     timestamps: true
