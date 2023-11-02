@@ -7,9 +7,9 @@ const formateData = date.format('DD-MM-YYYY')
 // ------------------HERE TRANER CAN UPLOAD THE VIDEO--------------------
 const uploadVideo = async (req, res) => {
     try {
-        const { id, header, note } = req.body;
+        const { userId, header, note } = req.body;
             await video.create({
-                trainerId: id,
+                trainerId: userId,
                 header,
                 note,
                 video: req.file.filename,
@@ -25,7 +25,7 @@ const uploadVideo = async (req, res) => {
 //----------------FETCH - VIDEO TO TRAINER-----------------
 const getTrainerVideo = async(req,res)=>{
     try {
-        const trainerVideo = await video.find({trainerId:req.body.id}).lean()
+        const trainerVideo = await video.find({trainerId:req.body.userId}).lean()
         return res.status(200).send({message:'fetch-trainerVideo',success:true,videoData:trainerVideo});
     } catch (error) {
         res.status(500).send({ message: error.message, success: false })

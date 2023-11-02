@@ -10,7 +10,7 @@ const formateData = date.format('DD-MM-YYYY')
 //---------------------------TRAINER CAN UPLOAD BLOG----------
 const UploadBlog = async (req, res) => {
   try {
-    await blog.create({ header: req.body.header, note: req.body.note, uploadDate: formateData, trainerId: req.body.id, blogImg: req.file.filename })
+    await blog.create({ header: req.body.header, note: req.body.note, uploadDate: formateData, trainerId: req.body.userId, blogImg: req.file.filename })
     return res.status(200).send({ message: 'Blog Created', success: true });
   } catch (error) {
     res.status(500).send({ message: 'error in UploadBlog', success: false })
@@ -38,8 +38,8 @@ const editBlog = async(req,res)=>{
 //---------------TRAINER- VIEW-EDIT BLOG--------------------
 const trainerBlog = async (req, res) => {
   try {
-    const { trainerId } = req.body
-    const trainerBlog = await blog.find({ trainerId: trainerId }).sort({ createdAt: -1 })
+    const { userId } = req.body
+    const trainerBlog = await blog.find({ trainerId: userId }).sort({ createdAt: -1 })
     if (trainerBlog) {
       return res.status(200).send({ message: 'fetch-trainer-blog', success: true, trainerBlog })
     } else {
@@ -84,5 +84,5 @@ module.exports = {
   trainerBlog,
   deleteBlog,
   editBlog,
-  blogDetails
+  blogDetails,
 }

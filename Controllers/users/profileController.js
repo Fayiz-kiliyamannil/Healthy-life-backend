@@ -74,6 +74,7 @@ const getTrainer = async (req, res, next) => {
 //----------------------   GET TRAINERS PROFILE ------------------------------------
 const getTrainerProfile = async (req, res, next) => {
     try {
+            const trainerInfo = await Trainer.findOne({_id:req.body.id})
             return res.status(200).send({ message: "get-trainer-details success", success: true, trainer: trainerInfo })
     } catch (error) {
         console.error(error.message);

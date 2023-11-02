@@ -5,7 +5,8 @@
 const profileController  = require('../Controllers/users/profileController');
 const blogController = require('../Controllers/users/userBlogConroller')
 const multer = require('../Middlewares/multer');
-const userVarified  = require('../Middlewares/varifiedUser')
+const userVarified  = require('../Middlewares/varifiedUser');
+const videoConntroller = require ('../Controllers/users/videoController')
  
 
  userRoute.post('/login',userController.userLogin)
@@ -22,6 +23,8 @@ const userVarified  = require('../Middlewares/varifiedUser')
  userRoute.get('/get-user-blog-info',authMiddlewares,blogController.getUserBlog);
  userRoute.post('/get-blog-details',authMiddlewares,blogController.getBlogDetails);
  userRoute.post('/contact-info',userController.contactDetails);
+ userRoute.get('/get-videos',authMiddlewares,videoConntroller.getUsersVideos);
+ userRoute.post('/video-info-control',authMiddlewares,videoConntroller.videoInfoControl)
 
  
    
