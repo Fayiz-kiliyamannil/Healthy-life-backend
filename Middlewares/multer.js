@@ -7,7 +7,7 @@ const app = express();
 try {
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, path.join(__dirname,'../public/profileImage'))
+      cb(null, path.join(__dirname,'../public/image'))
     },
     filename: function (req, file, cb) {
       cb(null, Date.now() + '-' + file.originalname); // Append the current timestamp to the file name to make it unique

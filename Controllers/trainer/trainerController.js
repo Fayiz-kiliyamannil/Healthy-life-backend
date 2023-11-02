@@ -198,7 +198,7 @@ const getTraineeDetails = async (req, res) => {
     res.status(500).send({ message: error, success: false });
     console.error(error);
   }
-};
+};    
 
 
 //--------------------------TRAINER-CAN-UPDATE TRAINEE DIET PLAN-----------------------

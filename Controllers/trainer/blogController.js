@@ -68,7 +68,6 @@ const deleteBlog = async (req, res) => {
 // ------------------------TRAINER CAN EDIT BLOG ----------------
 const blogDetails = async (req, res) => {
   try {
-
     const blogDetails = await blog.findOne({_id:req.body.blogId})
      return res.status(200).send({message:'get blog-details',success:true,blog:blogDetails})
   } catch (error) {
@@ -76,6 +75,8 @@ const blogDetails = async (req, res) => {
     return res.status(500).send({ message: error.message, success: false })
   }
 }
+
+
 
 
 module.exports = {
