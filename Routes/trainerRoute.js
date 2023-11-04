@@ -6,6 +6,8 @@ const multer = require('../Middlewares/multer');
 const videoMulter = require('../Middlewares/videoMulter');
 const blogController = require('../Controllers/trainer/blogController')
 const videoController = require('../Controllers/trainer/videoController')
+const chatController = require('../Controllers/trainer/chatController');
+
 
 trainerRoute.post('/register', trainerController.trainerRegister);
 trainerRoute.post('/login', trainerController.trainerLogin);
@@ -25,6 +27,10 @@ trainerRoute.post('/fetch-trainer-video',authMiddleware,videoController.getTrain
 trainerRoute.post('/trainer-video-delete',authMiddleware,videoController.deleteVideo);
 trainerRoute.post('/trainer-video-details',authMiddleware,videoController.getVideoDetails);
 trainerRoute.post('/trainer-update-video',authMiddleware,videoController.updateVideo);
+
+trainerRoute.post('/trainer-create-chat/:id',authMiddleware,chatController.createNewChat);
+trainerRoute.get('/trainer-fetch-chat/:id',authMiddleware,chatController.fetchChats)
+
 
 
 

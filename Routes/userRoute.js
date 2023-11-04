@@ -6,7 +6,8 @@ const profileController  = require('../Controllers/users/profileController');
 const blogController = require('../Controllers/users/userBlogConroller')
 const multer = require('../Middlewares/multer');
 const userVarified  = require('../Middlewares/varifiedUser');
-const videoConntroller = require ('../Controllers/users/videoController')
+const videoConntroller = require ('../Controllers/users/videoController');
+const chatController = require('../Controllers/users/chatController');
  
 
  userRoute.post('/login',userController.userLogin)
@@ -24,8 +25,9 @@ const videoConntroller = require ('../Controllers/users/videoController')
  userRoute.post('/get-blog-details',authMiddlewares,blogController.getBlogDetails);
  userRoute.post('/contact-info',userController.contactDetails);
  userRoute.get('/get-videos',authMiddlewares,videoConntroller.getUsersVideos);
- userRoute.post('/video-info-control',authMiddlewares,videoConntroller.videoInfoControl)
-
+ userRoute.post('/video-info-control',authMiddlewares,videoConntroller.videoInfoControl);
+ userRoute.post('/create-new-chat',authMiddlewares,chatController.createNewChat)
+ userRoute.get('/fetch-chatbyid',authMiddlewares,chatController.fetchChatById);
  
    
  module.exports = userRoute;
