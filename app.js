@@ -44,36 +44,25 @@ const server = app.listen(port, () => {
         origin:'http://localhost:3000'
     }
  })
-
  io.on('connection',(socket)=>{
-    console.log('connected to socket.io.......!');
+    // console.log('connected to socket.io!');
 
-    socket.on('user-setup',(userData)=>{
-        socket.join(userData?._id);
-        console.log("userId---------usesr-setup",userData?._id);
-        socket.emit('connected..!')
-    })
-
-    socket.on('setup',(trainerData)=>{
-        socket.join(trainerData?.trainer);
-        console.log(trainerData?.trainer,'trainer--Id');
+    socket.on('setup',(Data)=>{
+        socket.join(Data?._id);
         socket.emit('connected..!')
     })    
-
     socket.on('joinChat',(room)=>{
         socket.join(room);
-        console.log(room,'user join in rooom---');
+      
     })
-
-    socket.on('submitChat',(newChat)=>{
-        console.log(newChat,'newchat');
+    socket.on('newChat',(newChat)=>{
         socket.emit('messageRecived',newChat)
-        
+        socket.emit('messageRecivedTrainer',newChat)
     }) 
 
 
  })
  
-
+   
   
   
