@@ -41,11 +41,13 @@ const server = app.listen(port, () => {
  const io = require('socket.io')(server,{
     pingTimeout: 60000,
     cors:{
-        origin:'http://localhost:3000'
+        origin:'http://localhost:3000',
+         methods: ['GET','POST'] 
+        
     }
- })
+ })  
  io.on('connection',(socket)=>{
-    // console.log('connected to socket.io!');
+    console.log('connected to socket.io!');
 
     socket.on('setup',(Data)=>{
         socket.join(Data?._id);
@@ -60,9 +62,28 @@ const server = app.listen(port, () => {
         socket.emit('messageRecivedTrainer',newChat)
     }) 
 
+    socket.on('userOnlineSetup',(room)=>{
+        socket.join(room);
+        console.log(room,'roooooooom----------');
+    })   
 
- })
- 
+    socket.emit('me',socket.id) // ---------id pass
+     console.log(socket.id,'------iddd----------------');
+
+    socket.on('disconnect',()=>{  // for video call-----------------
+        socket.broadcast.emit('callended')
+    })
+
+    socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+		io.to(userToCall).emit("callUser", { signal: signalData, from, name });
+        console.log(userToCall,'-------userToCall------');
+	});
+
+
+	socket.on("answerCall", (data) => {
+		io.to(data.to).emit("callAccepted", data.signal)
+	});
+ }) 
    
   
   
