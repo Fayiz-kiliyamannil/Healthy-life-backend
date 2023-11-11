@@ -47,7 +47,7 @@ const server = app.listen(port, () => {
     }
  })  
  io.on('connection',(socket)=>{
-    console.log('connected to socket.io!');
+    // console.log('connected to soc                                                                              ket.io!');
 
     socket.on('setup',(Data)=>{
         socket.join(Data?._id);
@@ -61,29 +61,35 @@ const server = app.listen(port, () => {
         socket.emit('messageRecived',newChat)
         socket.emit('messageRecivedTrainer',newChat)
     }) 
+        
+    socket.on('trainerJoin',(trainerId)=>{ // ----------to connect trainer
+        socket.join(trainerId);
+        socket.emit('me',trainerId) // ---------id pass
 
-    socket.on('userOnlineSetup',(room)=>{
-        socket.join(room);
-        console.log(room,'roooooooom----------');
-    })   
-
-    socket.emit('me',socket.id) // ---------id pass
-     console.log(socket.id,'------iddd----------------');
-
-    socket.on('disconnect',()=>{  // for video call-----------------
-        socket.broadcast.emit('callended')
     })
 
-    socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+    socket.on('userJoin',(userId)=>{
+        socket.join(userId);
+        socket.emit('me',userId) // ---------id pass
+
+    })
+
+
+    socket.on("callUser", ({ userToCall, signalData, from, name }) => { 
 		io.to(userToCall).emit("callUser", { signal: signalData, from, name });
-        console.log(userToCall,'-------userToCall------');
+
 	});
 
-
-	socket.on("answerCall", (data) => {
+	socket.on("answerCall", (data) => { 
 		io.to(data.to).emit("callAccepted", data.signal)
+
 	});
- }) 
+
+    socket.on('disconnect',()=>{   // for video call-----------------
+        socket.broadcast.emit('callended')
+    });
+
+ }  )      
+         
    
-  
-  
+   
