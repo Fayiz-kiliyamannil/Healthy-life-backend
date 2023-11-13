@@ -13,8 +13,14 @@ const contactSchema = mongoose.Schema({
     message:{
         type:String,
         require:true,
+    },
+    date:{
+        type:String,
+        require:true,
     }
 
+},{
+    timestamps: true
 })
 
 module.exports = mongoose.model('contact',contactSchema)

@@ -3,8 +3,11 @@ const trainers = require('../../Models/trainerModel')
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const moment = require('moment') 
 const contact = require('../../Models/contact')
 
+const date = moment();
+const formateDate = date.format('DD-MM-YYYY')
 
 //otp-gmail  
 let email;
@@ -187,7 +190,8 @@ const contactDetails = async(req,res,next)=>{
        await contact.create({
         name:req.body.name,
         email:req.body.email,
-        message:req.body.message
+        message:req.body.message,
+        date:formateDate
        })
        return res.status(200).send({message:'Your message sent' ,success:true})
     } catch (error) {

@@ -4,7 +4,7 @@ const adminController = require('../Controllers/admin/adminController');
 const  trainerController = require('../Controllers/admin/adminTrainerController');
 const traineeController = require ('../Controllers/admin/adminTraineeController')
 const authMiddleware = require ('../Middlewares/authMiddlewares');
-
+const contactController = require('../Controllers/admin/contactController')
 
 adminRoute.post('/login',adminController.adminLogin)
 adminRoute.get('/trainees',authMiddleware,adminController.all_Trainees);
@@ -16,6 +16,8 @@ adminRoute.post('/trainee-details',authMiddleware,traineeController .traineeDeta
 adminRoute.post('/trainee-action',authMiddleware,traineeController.userBlockUnblock);
 adminRoute.post('/trainer-action',authMiddleware,trainerController.trainerBlockUnblock);
 adminRoute.post('/get-trainer-info',authMiddleware,trainerController.trainersDetails)
-
+adminRoute.get('/fetch-inbox',authMiddleware,contactController.getAllMessage);
+adminRoute.put('/delete-message/:id',authMiddleware,contactController.forDeleteMessage);
+  
 
 module.exports = adminRoute;
