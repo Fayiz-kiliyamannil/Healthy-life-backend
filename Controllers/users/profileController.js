@@ -1,9 +1,8 @@
 
 const User = require('../../Models/userModel');
 const Trainer = require('../../Models/trainerModel');
-const mongooss = require('mongoose');
-const {ObjectId} = mongooss.Types
-
+const Order = require('../../Models/orderModel')
+const todayDate = new Date()
 //---------------------------------------------USER UPDATE THE PROFILE---------------------------
 
 const updateProfile = async (req, res, next) => {
@@ -55,6 +54,11 @@ const updateProfile = async (req, res, next) => {
 const getUser = async (req, res, next) => {
     try {
         const userData = await User.findOne({ _id: req.body.userId }).populate('trainer');
+        const orderDetails = await Order.findOne({$and:[{userId:userData._id},{status:'Success'}]})
+         const endDate = new Date(orderDetails?.proEndIn);
+        if(endDate >= todayDate ) {
+            return res.status(200).send({ message: 'get-user-data', success: true, user: userData, isProUser:true });
+        }  
         return res.status(200).send({ message: 'get-user-data', success: true, user: userData });
     } catch (error) {
         next(error)

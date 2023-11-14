@@ -3,9 +3,10 @@ const trainers = require('../../Models/trainerModel')
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const moment = require('moment') 
+const moment = require('moment');
+const Order = require('../../Models/orderModel');
 const contact = require('../../Models/contact')
-
+const todayDate = new Date(); 
 const date = moment();
 const formateDate = date.format('DD-MM-YYYY')
 
@@ -161,7 +162,11 @@ const registerOtp = async (req, res,next) => {
 const userVarified = async (req, res,next) => {
     try {
         const users = await user.findOne({ _id: req.body.userId })
-
+        const orderDetails = await Order.findOne({$and:[{userId:users._id},{status:'Success'}]})
+        const endDate = new Date(orderDetails?.proEndIn)
+        if( endDate >= todayDate ){
+            return res.status(200).send({ success: true, data:users,isProUser:true})
+        }
         if (users) { 
             return res.status(200).send({ success: true, data:users})
         } else {
