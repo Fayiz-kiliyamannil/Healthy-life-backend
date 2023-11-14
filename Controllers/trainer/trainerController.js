@@ -2,6 +2,10 @@ const bcrypt = require("bcrypt");
 const trainer = require("../../Models/trainerModel");
 const jwt = require("jsonwebtoken");
 const trainee = require("../../Models/userModel");
+const Blog = require('../../Models/blogModel');
+const Video = require('../../Models/videoModel');
+const User = require('../../Models/userModel');
+const Order = require('../../Models/orderModel');
 
 const securePassword = async (password) => {
   try {
@@ -11,6 +15,7 @@ const securePassword = async (password) => {
     console.error("securepassword error");
   }
 };
+
 
 const trainerRegister = async (req, res) => {
   try {
@@ -111,9 +116,10 @@ const trainerProfile = async (req, res) => {
   }
 };
 
+
+
 const trainerEditProfile = async (req, res) => {
   try {
-
     const trainerInfo = await trainer.findOne({ _id: req.body._id })
 
     if (!req.file) {
@@ -183,7 +189,6 @@ const getTrainees = async (req, res) => {
 };
 
 //---------------------------------------GET TRAINEES DETAILS-PROFILE-INFO---------------------------
-
 const getTraineeDetails = async (req, res) => {
   try {
     const userDetails = await trainee.findOne({ _id: req.body.traineeId }).populate('trainer');
@@ -198,7 +203,7 @@ const getTraineeDetails = async (req, res) => {
     res.status(500).send({ message: error, success: false });
     console.error(error);
   }
-};    
+};
 
 
 //--------------------------TRAINER-CAN-UPDATE TRAINEE DIET PLAN-----------------------
@@ -212,14 +217,14 @@ const updateDietPlan = async (req, res) => {
         dailyCaloriegoal,
         proteinIntake,
         waterIntake,
-        carbohydrateAndTatintake,  
+        carbohydrateAndTatintake,
         mealPlanCreation,
         dietaryGoals,
         nutritionalAnalysis,
         supplementTracking,
       }
     })
-    const traineeinfo = await trainee.findOne({ _id: _id}).lean()
+    const traineeinfo = await trainee.findOne({ _id: _id }).lean()
     return res.status(200).send({ message: 'New Diet-Plan Updated', success: true, trainee: traineeinfo })
   } catch (error) {
     res.status(500).send({ message: error, success: false });
@@ -227,6 +232,54 @@ const updateDietPlan = async (req, res) => {
   }
 }
 
+//-----------------GET DASHBOARD DETAILS -------------------
+const getDashboardInfo = async (req, res) => {
+  try {
+    const startAt = new Date();
+    startAt.setHours(0, 0, 0, 0);
+    const endAt = new Date()
+    endAt.setHours(23, 59, 59, 999);
+
+    const { userId } = req.body;
+    const totalBlog = await Blog.countDocuments({ trainerId: userId });
+    const totalVideo = await Video.countDocuments({ trainerId: userId });
+    const totalTrainees = await User.countDocuments({ trainer: userId });
+    const salesPerDay = await Order.find({
+      $and: [{
+        trainerId: userId
+      }, {
+        proStartIn: {
+          $gte: startAt,
+          $lte: endAt
+        },
+      }, {
+        status: "Success"
+      }]
+    })
+    const totalSales = salesPerDay.reduce((accumulator, currentValue) => {
+      return accumulator + parseInt(currentValue.price);
+    }, 0);
+    const totalProfit = salesPerDay.reduce((accumulator, currentValue) => {
+      return accumulator + parseInt(currentValue.trainerFees);
+    }, 0)
+    const order = await Order.find({trainerId:userId}).populate('userId')
+    return res.status(200).send({
+      message: 'getDataSuccess', success: true,
+      order: order,
+      details: {
+        totalBlog,
+        totalVideo,
+        totalTrainees,
+        totalSales,
+        totalProfit,
+      }
+  })
+
+  } catch (error) {
+    res.status(500).send({ message: error, success: false });
+    console.error(error);
+  }
+}
 
 module.exports = {
   trainerRegister,
@@ -236,4 +289,5 @@ module.exports = {
   getTraineeDetails,
   getTrainees,
   updateDietPlan,
+  getDashboardInfo
 };

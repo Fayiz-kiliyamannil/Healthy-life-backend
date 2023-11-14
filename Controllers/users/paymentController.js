@@ -1,8 +1,6 @@
 const Razorpay = require('razorpay');
 const Order = require('../../Models/orderModel')
 const todayDate = new Date();
-const { v4: uuidv4 } = require('uuid');
-const randomID = uuidv4();
 const User = require('../../Models/userModel')
 
 
@@ -11,6 +9,7 @@ var instance = new Razorpay({
     key_id: process.env.KEY_ID, 
     key_secret: process.env.KEY_SECRET,  
 })
+
 
 
 // ------------------ PLACE SUBSCRIPTION ORDER-------------------
@@ -47,6 +46,7 @@ const placePayment = async (req, res) => {
                 userId: userId,
                 proStartIn: todayDate,   
                 proEndIn: endDate,
+                noOfMonth:id,
                 status: status,
                 price: price,
                 orderId: response.receipt,

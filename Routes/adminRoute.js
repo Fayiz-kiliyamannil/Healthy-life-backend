@@ -4,9 +4,12 @@ const adminController = require('../Controllers/admin/adminController');
 const  trainerController = require('../Controllers/admin/adminTrainerController');
 const traineeController = require ('../Controllers/admin/adminTraineeController')
 const authMiddleware = require ('../Middlewares/authMiddlewares');
-const contactController = require('../Controllers/admin/contactController')
+const contactController = require('../Controllers/admin/contactController');
+const admin = require('../Models/admin');
 
-adminRoute.post('/login',adminController.adminLogin)
+adminRoute.post('/login',adminController.adminLogin);
+adminRoute.get('/get-dashboard-info',authMiddleware,adminController.getAllDetails);
+adminRoute.get('/get-sales-info',authMiddleware,adminController.getSalesData)
 adminRoute.get('/trainees',authMiddleware,adminController.all_Trainees);
 adminRoute.get('/trainers',authMiddleware,trainerController.allTrainerDetails);
 adminRoute.get('/newtrainers',authMiddleware,trainerController.newTrainers);

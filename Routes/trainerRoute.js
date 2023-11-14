@@ -11,6 +11,7 @@ const chatController = require('../Controllers/trainer/chatController');
 
 trainerRoute.post('/register', trainerController.trainerRegister);
 trainerRoute.post('/login', trainerController.trainerLogin);
+trainerRoute.get('/get-dashboard-info',authMiddleware,trainerController.getDashboardInfo);
 trainerRoute.post('/get-trainer-info', authMiddleware, trainerController.trainerProfile);
 trainerRoute.post('/trainer-profile-edit', multer.upload.single('profile'), trainerController.trainerEditProfile);
 trainerRoute.post('/trainer-upload-blog', multer.upload.single('blogImg'),authMiddleware, blogController.UploadBlog)
