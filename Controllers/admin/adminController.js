@@ -5,7 +5,6 @@ const Order = require('../../Models/orderModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const date = new Date();
-
 // const month = todayDate.getMonth()+1
 // console.log(month);
 
@@ -50,8 +49,8 @@ const getAllDetails = async (req, res) => {
         const noOfUsers = await user.countDocuments({ is_block: false });
         const blockedUsers = await user.countDocuments({ is_block: true })
         const noOfTrainers = await Trainer.countDocuments({ is_verified: true });
-        const blockedTrainers = await Trainer.countDocuments({is_block:true})
-        const  sales =  await Order.find({status:'Success'})
+        const blockedTrainers = await Trainer.countDocuments({ is_block: true })
+        const sales = await Order.find({ status: 'Success' })
         const salesPerDay = await Order.find({
             $and: [{
                 proStartIn: {
@@ -68,19 +67,19 @@ const getAllDetails = async (req, res) => {
         const perDayProfit = salesPerDay.reduce((accumulator, currentValue) => {
             return accumulator + parseInt(currentValue.adminFees);
         }, 0)
-        const totalSales = sales.reduce((accumulator,currentValue)=>{
-         return accumulator  + parseInt(currentValue.price)
-        },0)
-        const  totalProfit = sales.reduce((accumulator,currentValue)=>{
+        const totalSales = sales.reduce((accumulator, currentValue) => {
+            return accumulator + parseInt(currentValue.price)
+        }, 0)
+        const totalProfit = sales.reduce((accumulator, currentValue) => {
             return accumulator + parseInt(currentValue.adminFees)
-        },0)
-        
-        const order = await Order.find().sort({createdAt: -1}).limit(10).populate('userId');
+        }, 0)
+
+        const order = await Order.find().sort({ createdAt: -1 }).limit(10).populate('userId');
         // const salesReport = await Order.find({status:'Success'}).sort({createdAt:-1}).populate('userId')
         return res.status(200).send({
             message: 'getDataSuccess', success: true,
             order: order,
-       
+
             details: {
                 noOfUsers,
                 blockedUsers,
@@ -135,16 +134,16 @@ const getSalesData = async (req, res) => {
             }, 0))
 
         }
-         const  totalSalesprevSevenDays = totalSalesPerDay.reduce((accumulator,currentValue)=>{
-            return accumulator+currentValue;
-         })
+        const totalSalesprevSevenDays = totalSalesPerDay.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        })
 
         return res.status(200).send({
             message: 'get-salesData success',
             totalProfitPerDay,
             totalSalesPerDay,
             totalSalesprevSevenDays,
-            date:perDate,
+            date: perDate,
             success: true
         })
     } catch (error) {
@@ -153,14 +152,43 @@ const getSalesData = async (req, res) => {
     }
 }
 
- 
+//---------GET SALES REPORT ---------------
+const getSalesReport = async (req, res) => {
+    try {
+        const { days } = req.body;
+
+        const today = new Date()
+        today.setDate(today.getDate() - days)
+        today.setHours(0, 0, 0, 0);
+
+        const endAt = new Date();
+        endAt.setHours(23, 59, 59, 999);
+
+        const salesReport = await Order.find({
+            $and: [{
+                createdAt: {
+                    $gte: today,
+                    $lte: endAt,
+                }    
+            }, {
+                status: 'Success'
+            }]
+        }).populate('userId').populate('trainerId').sort({createdAt:-1})
+    
+         return res.status(200).send({message:"fetch message data",success:true,salesReport})
+    } catch (error) {
+        res.status(500).send({ message: error.message, succeess: false })
+        console.error(error.message);
+    }
+}
+
+
 //----------GET TO  ALL TRAINEES DETAILS --------------
 const all_Trainees = async (req, res) => {
 
     try {
-        const userData = await user.find({})
-        console.log(userData);
-        res.status(200).send({ userData, success: true })
+        const userData = await user.find({});
+        res.status(200).send({ userData , success: true  });
     } catch (error) {
         res.status(500).send({ message: "error in all_Trainees", succeess: false })
         console.error(error);
@@ -169,9 +197,12 @@ const all_Trainees = async (req, res) => {
 }
 
 
+
+
 module.exports = {
     adminLogin,
     all_Trainees,
     getAllDetails,
     getSalesData,
+    getSalesReport
 }

@@ -31,7 +31,6 @@ const trainerRegister = async (req, res) => {
         .send({ message: "The Trainer Name already exists", success: false });
     } else {
       const passwordhash = await securePassword(req.body.password);
-      // console.log(passwordhash);
       const data = new trainer({
         email: req.body.email,
         password: passwordhash,
@@ -254,15 +253,31 @@ const getDashboardInfo = async (req, res) => {
         },
       }, {
         status: "Success"
+      },]
+    })
+
+    const sales = await Order.find({
+      $and:[{
+        trainerId:userId,
+      },{
+        status:'Success',
       }]
     })
-    const totalSales = salesPerDay.reduce((accumulator, currentValue) => {
+
+    const perDaySales = salesPerDay.reduce((accumulator, currentValue) => {
       return accumulator + parseInt(currentValue.price);
     }, 0);
-    const totalProfit = salesPerDay.reduce((accumulator, currentValue) => {
+    const perDayProfit = salesPerDay.reduce((accumulator, currentValue) => {
       return accumulator + parseInt(currentValue.trainerFees);
     }, 0)
-    const order = await Order.find({trainerId:userId}).populate('userId')
+    const totalSales = sales.reduce((accumulator,currentValue)=>{
+      return accumulator + parseInt(currentValue.price)
+    },0)
+    const totalProfit = sales.reduce((accumulator, currentValue) => {
+      return accumulator + parseInt(currentValue.trainerFees);
+    }, 0);
+    const order = await Order.find({trainerId:userId}).populate('userId').sort({createdAt:-1}).limit(5)
+  
     return res.status(200).send({
       message: 'getDataSuccess', success: true,
       order: order,
@@ -270,6 +285,8 @@ const getDashboardInfo = async (req, res) => {
         totalBlog,
         totalVideo,
         totalTrainees,
+        perDaySales,
+        perDayProfit,
         totalSales,
         totalProfit,
       }
@@ -278,6 +295,96 @@ const getDashboardInfo = async (req, res) => {
   } catch (error) {
     res.status(500).send({ message: error, success: false });
     console.error(error);
+  }
+}
+//---------------------getSALES INFORMATION--------------
+const getSalesInfo = async(req,res)=>{
+  const {userId} = req.body;
+  try {
+    let perDate = []
+    const totalSalesPerDay = [];
+    const totalProfitPerDay = [];
+
+    for (let i = 6; i >= 0; i--) {
+        const startAt = new Date()
+        startAt.setDate(startAt.getDate() - i)
+        startAt.setHours(0, 0, 0, 0)
+
+        const endAt = new Date(startAt);
+        endAt.setHours(23, 59, 59, 999);
+
+        const date = startAt.toDateString()
+        const dateAndMonth = date.slice(3, 10);
+        perDate.push(dateAndMonth);
+
+        const salesPerDay = await Order.find({ // -------to  fetch total  Order previos 7 days
+            $and: [{
+                proStartIn: {
+                    $gte: startAt,
+                    $lte: endAt,
+                }
+            }, {
+                status: 'Success'
+            },{
+              trainerId:userId,
+            }]
+        });
+
+        totalSalesPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
+            return accumulator + parseInt(currentValue.price);
+        }, 0))
+
+        totalProfitPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
+            return accumulator + parseInt(currentValue.trainerFees)
+        }, 0))
+
+    }
+    const totalSalesprevSevenDays = totalSalesPerDay.reduce((accumulator, currentValue) => {
+        return accumulator + currentValue;
+    })
+
+    return res.status(200).send({
+        message: 'get-salesData success',
+        totalProfitPerDay,
+        totalSalesPerDay,
+        totalSalesprevSevenDays,
+        date: perDate,
+        success: true
+    })
+  } catch (error) {  
+    res.status(500).send({ message: error, success: false });
+    console.error(error.message);
+  }
+}
+
+const getSalesReport=async(req,res)=>{
+  try {
+    const { days,userId } = req.body;
+
+        const today = new Date()
+        today.setDate(today.getDate() - days)
+        today.setHours(0, 0, 0, 0);
+
+        const endAt = new Date();
+        endAt.setHours(23, 59, 59, 999);
+
+        const salesReport = await Order.find({
+            $and: [{
+                createdAt: {
+                    $gte: today,
+                    $lte: endAt,
+                }
+            }, {
+                status: 'Success'
+            },{
+              trainerId:userId,
+            }]
+        }).populate('userId').populate('trainerId').sort({createdAt:-1})
+    
+         return res.status(200).send({message:"fetch message data",success:true,salesReport})
+  } catch (error) {
+    res.status(500).send({ message: error, success: false });
+    console.error(error.message);
   }
 }
 
@@ -289,5 +396,7 @@ module.exports = {
   getTraineeDetails,
   getTrainees,
   updateDietPlan,
-  getDashboardInfo
+  getDashboardInfo,
+  getSalesInfo,
+  getSalesReport,
 };

@@ -9,7 +9,8 @@ const admin = require('../Models/admin');
 
 adminRoute.post('/login',adminController.adminLogin);
 adminRoute.get('/get-dashboard-info',authMiddleware,adminController.getAllDetails);
-adminRoute.get('/get-sales-info',authMiddleware,adminController.getSalesData)
+adminRoute.get('/get-sales-info',authMiddleware,adminController.getSalesData);
+adminRoute.post('/sales-report',authMiddleware,adminController.getSalesReport)
 adminRoute.get('/trainees',authMiddleware,adminController.all_Trainees);
 adminRoute.get('/trainers',authMiddleware,trainerController.allTrainerDetails);
 adminRoute.get('/newtrainers',authMiddleware,trainerController.newTrainers);
@@ -21,6 +22,7 @@ adminRoute.post('/trainer-action',authMiddleware,trainerController.trainerBlockU
 adminRoute.post('/get-trainer-info',authMiddleware,trainerController.trainersDetails)
 adminRoute.get('/fetch-inbox',authMiddleware,contactController.getAllMessage);
 adminRoute.put('/delete-message/:id',authMiddleware,contactController.forDeleteMessage);
+
   
 
 module.exports = adminRoute;
