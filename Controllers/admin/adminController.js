@@ -4,7 +4,11 @@ const Trainer = require('../../Models/trainerModel');
 const Order = require('../../Models/orderModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
-const todayDate = new Date()
+const date = new Date();
+
+// const month = todayDate.getMonth()+1
+// console.log(month);
+
 
 const adminLogin = async (req, res) => {
     try {
@@ -46,52 +50,110 @@ const getAllDetails = async (req, res) => {
         const noOfUsers = await user.countDocuments({ is_block: false });
         const blockedUsers = await user.countDocuments({ is_block: true })
         const noOfTrainers = await Trainer.countDocuments({ is_verified: true });
+        const blockedTrainers = await Trainer.countDocuments({is_block:true})
+        const  sales =  await Order.find({status:'Success'})
         const salesPerDay = await Order.find({
-           $and:[{
-            proStartIn: {
-                $gte: startAt,
-                $lte: endAt
-            }
-           },{
-            status:"Success"
-           }]
+            $and: [{
+                proStartIn: {
+                    $gte: startAt,
+                    $lte: endAt
+                }
+            }, {
+                status: "Success"
+            }]
         })
-        const totalSales = salesPerDay.reduce((accumulator, currentValue) => {
+        const perDaySales = salesPerDay.reduce((accumulator, currentValue) => {
             return accumulator + parseInt(currentValue.price);
         }, 0);
-        const totalProfit = salesPerDay.reduce((accumulator, currentValue) => {
+        const perDayProfit = salesPerDay.reduce((accumulator, currentValue) => {
             return accumulator + parseInt(currentValue.adminFees);
         }, 0)
-        const order = await Order.find().populate('userId')
+        const totalSales = sales.reduce((accumulator,currentValue)=>{
+         return accumulator  + parseInt(currentValue.price)
+        },0)
+        const  totalProfit = sales.reduce((accumulator,currentValue)=>{
+            return accumulator + parseInt(currentValue.adminFees)
+        },0)
+        
+        const order = await Order.find().sort({createdAt: -1}).limit(10).populate('userId');
+        // const salesReport = await Order.find({status:'Success'}).sort({createdAt:-1}).populate('userId')
         return res.status(200).send({
             message: 'getDataSuccess', success: true,
             order: order,
+       
             details: {
                 noOfUsers,
                 blockedUsers,
                 noOfTrainers,
+                perDaySales,
+                perDayProfit,
+                blockedTrainers,
                 totalProfit,
                 totalSales,
             }
         })
-    } catch (error) {   
+    } catch (error) {
         console.error(error.message);
     }
 }
 
- //----------GET SALES DATA-----------
- const getSalesData =async(req,res)=>{
+//----------GET SALES DATA-----------
+const getSalesData = async (req, res) => {
     try {
-        const graphData = await Order.find({status:"Success"}).sort({proStartIn:-1}).limit(7);
-    
-        return res.status(200).send({ message:'get-salesData success',graphData,success: true })
+        let perDate = []
+        const totalSalesPerDay = [];
+        const totalProfitPerDay = [];
+        for (let i = 6; i >= 0; i--) {
+
+            const startAt = new Date()
+            startAt.setDate(startAt.getDate() - i)
+            startAt.setHours(0, 0, 0, 0)
+
+            const endAt = new Date(startAt);
+            endAt.setHours(23, 59, 59, 999);
+
+            const date = startAt.toDateString()
+            const dateAndMonth = date.slice(3, 10);
+            perDate.push(dateAndMonth);
+            const salesPerDay = await Order.find({ // -------to  fetch total  Order previos 7 days
+                $and: [{
+                    proStartIn: {
+                        $gte: startAt,
+                        $lte: endAt,
+                    }
+                }, {
+                    status: 'Success'
+                }]
+            });
+
+            totalSalesPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
+                return accumulator + parseInt(currentValue.price);
+            }, 0))
+
+            totalProfitPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
+                return accumulator + parseInt(currentValue.adminFees)
+            }, 0))
+
+        }
+         const  totalSalesprevSevenDays = totalSalesPerDay.reduce((accumulator,currentValue)=>{
+            return accumulator+currentValue;
+         })
+
+        return res.status(200).send({
+            message: 'get-salesData success',
+            totalProfitPerDay,
+            totalSalesPerDay,
+            totalSalesprevSevenDays,
+            date:perDate,
+            success: true
+        })
     } catch (error) {
         res.status(500).send({ message: "error in get sales data", succeess: false })
-        console.error(error);
+        console.error(error.message);
     }
- }
+}
 
-
+ 
 //----------GET TO  ALL TRAINEES DETAILS --------------
 const all_Trainees = async (req, res) => {
 
