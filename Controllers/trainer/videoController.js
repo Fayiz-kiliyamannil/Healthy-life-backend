@@ -25,7 +25,7 @@ const uploadVideo = async (req, res) => {
 //----------------FETCH - VIDEO TO TRAINER-----------------
 const getTrainerVideo = async(req,res)=>{
     try {
-        const trainerVideo = await video.find({trainerId:req.body.userId}).lean()
+        const trainerVideo = await video.find({trainerId:req.body.userId}).lean().sort({createdAt:-1})
         return res.status(200).send({message:'fetch-trainerVideo',success:true,videoData:trainerVideo});
     } catch (error) {
         res.status(500).send({ message: error.message, success: false })

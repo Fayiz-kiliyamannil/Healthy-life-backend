@@ -17,9 +17,9 @@ const trainerSchema = mongoose.Schema({
         type: String,
         require: false,
     },
-    specilized:{
-        type:String,
-        require:false,
+    specilized: {
+        type: String,
+        require: false,
     },
     weight: {
         type: String,
@@ -42,7 +42,7 @@ const trainerSchema = mongoose.Schema({
         require: true
     },
     phone: {
-        type: String, 
+        type: String,
         require: true
     },
     profile: {
@@ -60,9 +60,12 @@ const trainerSchema = mongoose.Schema({
     adress: {
         type: String,
     },
-
-
-
+    rating: {
+        type: String,
+    },
+    noOfRating:{
+        type:String,
+    }
 
 }, {
     timestamps: true

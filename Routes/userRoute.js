@@ -19,7 +19,8 @@ userRoute.get('/get-trainers', authMiddlewares, userController.get_Traienrs);
 userRoute.post('/user-profile-update-info', multer.upload.single('profile'), profileController.updateProfile);
 userRoute.post('/get-user-info', authMiddlewares, profileController.getUser);
 userRoute.get('/get-trainer-info', authMiddlewares, profileController.getTrainer);
-userRoute.post('/get-trainers-details', authMiddlewares, profileController.getTrainerProfile)
+userRoute.post('/get-trainers-details', authMiddlewares, profileController.getTrainerProfile);
+userRoute.post('/trainer-rating',authMiddlewares,profileController.trainerRating);
 userRoute.post('/profile', authMiddlewares, profileController.getProfile);
 userRoute.get('/get-user-blog-info', authMiddlewares, blogController.getUserBlog);
 userRoute.post('/get-blog-details', authMiddlewares, blogController.getBlogDetails);
@@ -29,6 +30,7 @@ userRoute.post('/video-info-control', authMiddlewares, videoConntroller.videoInf
 userRoute.post('/create-new-chat', authMiddlewares, chatController.createNewChat)
 userRoute.get('/fetch-chatbyid', authMiddlewares, chatController.fetchChatById);
 userRoute.post('/payment', authMiddlewares,paymentController.placePayment);
-userRoute.post('/payment-success',authMiddlewares,paymentController.confirmPayment)
+userRoute.post('/payment-success',authMiddlewares,paymentController.confirmPayment);
+
 
 module.exports = userRoute;

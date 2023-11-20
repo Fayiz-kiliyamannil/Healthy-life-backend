@@ -2,9 +2,11 @@
 const User = require('../../Models/userModel');
 const Trainer = require('../../Models/trainerModel');
 const Order = require('../../Models/orderModel')
-const todayDate = new Date()
-//---------------------------------------------USER UPDATE THE PROFILE---------------------------
+const todayDate = new Date();
+const Rating = require('../../Models/trainerRatingModel');
 
+
+//---------------------------------------------USER UPDATE THE PROFILE---------------------------
 const updateProfile = async (req, res, next) => {
     try {
         const trainerName = req.body.trainer.firstname || req.body.trainer;
@@ -78,8 +80,55 @@ const getTrainer = async (req, res, next) => {
 //----------------------   GET TRAINERS PROFILE ------------------------------------
 const getTrainerProfile = async (req, res, next) => {
     try {
-            const trainerInfo = await Trainer.findOne({_id:req.body.id})
-            return res.status(200).send({ message: "get-trainer-details success", success: true, trainer: trainerInfo })
+            const trainerInfo = await Trainer.findOne({_id:req.body.id});
+
+            const totalRating = await Rating.find({trainerId:trainerInfo._id})
+            const countRating  = await Rating.countDocuments({trainerId:trainerInfo._id});
+            const ratingTotal  =  totalRating.reduce((accumulator,currentValue)=>{
+              return accumulator + parseInt(currentValue.rating)
+            },0)
+               const averageRating =  Math.floor(ratingTotal/countRating);
+
+            return res.status(200).send({ message: "get-trainer-details success", success: true, trainer: trainerInfo ,rating:averageRating,countRating})
+    } catch (error) {
+        console.error(error.message);
+        next(error)
+    }
+}
+//------------HERER WE CAN RATE THE TRAIENR--------------------------------
+const trainerRating = async(req,res,next)=>{
+    try {
+         const {trainerId,rating} = req.body.trainerRating;
+         const {userId} = req.body;
+          
+          const user = await Rating.findOne({$and:[
+            {userId:userId},
+            {trainerId:trainerId},
+          ]})
+          if(user){
+            await Rating.updateOne({$and:[
+                {userId:userId},
+                {trainerId:trainerId}
+            ]},{
+               $set:{
+                rating:rating
+               }
+            })
+          }else{
+            await Rating.create({
+                userId:userId,
+                trainerId:trainerId,
+                rating:rating,
+            })
+          }
+          
+          const trainerRating = await Rating.findOne({$and:[
+            {trainerId:trainerId},
+            {userId,userId}
+          ]})
+          return res.status(201).send({message:'submit trainer rating ',success:true, trainerRating })
+
+
     } catch (error) {
         console.error(error.message);
         next(error)
@@ -90,7 +139,15 @@ const getTrainerProfile = async (req, res, next) => {
 const getProfile = async (req, res, next) => {
     try {
         const userData = await User.findOne({ _id: req.body.userId }).populate('trainer')
-        return res.status(200).send({ message: 'get-user-info', success: true, user: userData })
+       if(userData){
+        const  trainerRating = await Rating.findOne({$and:[
+           { userId:userData._id},
+           {trainerId:userData.trainer._id}
+        ]})
+        return res.status(200).send({ message: 'get-user-info', success: true, user: userData, rating:trainerRating });
+       }
+        
+
     } catch (error) {
         next(error)
     }
@@ -103,5 +160,6 @@ module.exports = {
     getProfile,
     getTrainerProfile,
     getTrainer,
+    trainerRating,
 
 }
