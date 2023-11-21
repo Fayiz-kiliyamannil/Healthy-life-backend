@@ -1,5 +1,5 @@
 const trainer = require("../../Models/trainerModel");
-
+const Rating = require('../../Models/trainerRatingModel')
 const allTrainerDetails = async (req, res) => {
   try {
     const trainerData = await trainer.find({ is_verified: true }).lean();
@@ -32,12 +32,23 @@ const newTrainers = async (req, res) => {
 const trainersDetails = async (req, res) => {
   try {
     const trainerData = await trainer.findOne({ _id: req.body.id });
+    const totalRating = await Rating.find({trainerId:req.body.id})
+    const countRating =  await Rating.countDocuments({trainerId:req.body.id})
+
+     const rating = totalRating.reduce((accumulator,currentValue)=>{
+      return accumulator +  parseInt(currentValue.rating);
+     },0)
+       const avgRating = Math.floor(rating/countRating)
+
+
     return res
       .status(200)
       .send({
         message: "get new trainer profile",
         success: true,
-        trainer: trainerData,
+        trainer: trainerData,   
+        noOfRating:countRating,
+        rating:avgRating
       });
   } catch (error) {
     res
