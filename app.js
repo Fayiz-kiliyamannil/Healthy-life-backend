@@ -38,7 +38,7 @@ const server = app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 }) 
 
- const io = require('socket.io')(server,{
+ const io = require('socket.io')(server,{       
     pingTimeout: 60000,
     cors:{
         origin:'http://localhost:3000',
@@ -47,7 +47,8 @@ const server = app.listen(port, () => {
     }
  })  
  io.on('connection',(socket)=>{
-    // console.log('connected to soc                                                                              ket.io!');
+    // console.log('connected to socket.io!');
+    
 
     socket.on('setup',(Data)=>{
         socket.join(Data?._id);
