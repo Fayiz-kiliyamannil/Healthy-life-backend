@@ -6,18 +6,21 @@ const Order = require('../../Models/orderModel');
 
 const getUsersVideos = async (req, res, next) => {
     try {
-        const userDetails = await user.findOne({ _id: req.body.userId })
+         const {_page,_limit} = req.query;
+        const userDetails = await user.findOne({ _id: req.body.userId });
         const orderDetails = await Order.findOne({ $and: [{ userId: userDetails._id }, { status: "Success" }] });
+        const countVideo = await video.countDocuments({trainerId: userDetails.trainer});
+        const noOfPage = Math.ceil(countVideo/_limit);
         const endDate = new Date(orderDetails?.proEndIn)
-        if (endDate >= toDayDate) {
-            const getVideos = await video.find({ trainerId: userDetails.trainer }).sort({createdAt:-1})
-            return res.status(200).send({ message: 'fetch-users-video-success', success: true, getVideos, proUser: true })
+        if (endDate >= toDayDate) { 
+            const getVideos = await video.find({ trainerId: userDetails.trainer }).sort({createdAt:-1}).limit(_limit).skip(_limit*(_page - 1))
+            return res.status(200).send({ message: 'fetch-users-video-success', success: true, getVideos, noOfpage:noOfPage,  proUser: true })
         } else {
             return res.status(200).send({ message: 'fetch-users-video-success', success: true })
-        }
+        }   
     } catch (error) {
         console.error(error.message);
-        next(error)
+        next(error)  
     }
 }
 

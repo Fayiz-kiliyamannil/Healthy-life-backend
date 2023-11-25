@@ -5,7 +5,7 @@ const blog = require('../../Models/blogModel');
 
 
 // ----------------------HERE THE USER CAN SEE THE ALL BLOG---------------------------------
-const getUserBlog = async (req,res)=>{
+const getUserBlog = async (req,res,next)=>{
     try {
        const page = req.query._page || 1
        const pageSize = req.query._limit || 6

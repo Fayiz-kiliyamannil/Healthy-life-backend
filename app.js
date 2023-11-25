@@ -26,7 +26,7 @@ const trainerRoute = require('./Routes/trainerRoute');
 const errorHandler = require('./Middlewares/errorHandler');
 
 app.use("/user", userRoute);
-app.use('/admin', adminRoute); 
+app.use('/admin', adminRoute);    
 app.use('/trainer', trainerRoute);
 
 

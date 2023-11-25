@@ -2,18 +2,17 @@ const user = require('../../Models/userModel');
 const trainer = require('../../Models/trainerModel')
 
 //----------------------------admin-GET-USER-DETAILS-----------------------------
-const traineeDetails  = async (req,res)=>{
+const traineeDetails  = async (req,res,next)=>{
     try {
         const userDetails = await user.findOne({_id:req.body.id}).populate('trainer')
         return res.status(200).send({message:'get-user-details success',success:true,trainee:userDetails});
     } catch (error) {
-        res.status(500).send({message:error,success:false})
-        console.error(error);
+       next(error)
     }
 }
 
 //-----------------HERE ADMIN CAN BLACK AND UNBLOCK USERS---------------------
-const userBlockUnblock = async(req,res)=>{
+const userBlockUnblock = async(req,res,next)=>{
     try {
         const trainee = await user.findOne({_id:req.body.id})
         if(trainee.is_block){
@@ -30,8 +29,7 @@ const userBlockUnblock = async(req,res)=>{
             return res.status(200).send({message:'Block the Trainee',success:true,trainee:traineeData})
         }
     } catch (error) {
-        res.status(500).send({message:error,success:false})
-        console.error(error);
+        next(error)
     }
 }
 

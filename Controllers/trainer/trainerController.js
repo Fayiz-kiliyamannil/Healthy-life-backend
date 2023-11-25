@@ -17,7 +17,7 @@ const securePassword = async (password) => {
 };
 
 
-const trainerRegister = async (req, res) => {
+const trainerRegister = async (req, res, next) => {
   try {
     const trainerExist = await trainer.findOne({ email: req.body.email });
     const username = await trainer.findOne({ name: req.body.name });
@@ -43,14 +43,11 @@ const trainerRegister = async (req, res) => {
         .send({ message: "Trainer registration is successful", success: true });
     }
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send({ message: "Error in trainerRegister", success: false });
+    next(error)
   }
 };
 
-const trainerLogin = async (req, res) => {
+const trainerLogin = async (req, res, next) => {
   try {
     const trainerData = await trainer.findOne({ email: req.body.email });
     if (trainerData) {
@@ -94,12 +91,11 @@ const trainerLogin = async (req, res) => {
         .send({ message: " Trainer not exist ", success: false });
     }
   } catch (error) {
-    res.status(500).send({ message: "error in trainer login", success: false });
-    console.error(error);
+    next(error)
   }
 };
 
-const trainerProfile = async (req, res) => {
+const trainerProfile = async (req, res, next) => {
   try {
     const trainerData = await trainer.findOne({ _id: req.body.userId });
     return res.status(200).send({
@@ -108,16 +104,13 @@ const trainerProfile = async (req, res) => {
       trainer: trainerData,
     });
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: "error in trainerProfile", success: false });
-    console.error(error);
+    next(error)
   }
 };
 
 
 
-const trainerEditProfile = async (req, res) => {
+const trainerEditProfile = async (req, res, next) => {
   try {
     const trainerInfo = await trainer.findOne({ _id: req.body._id })
 
@@ -167,19 +160,22 @@ const trainerEditProfile = async (req, res) => {
       .status(200)
       .send({ message: "Trainer Profile updated", success: true });
   } catch (error) {
-    res.status(500).send({ message: error, success: false });
-    console.error(error.message);
+    next(error)
   }
 };
 
 //-------------------------  GET TRAINEES------------------
 const getTrainees = async (req, res) => {
   try {
-    const userData = await trainee.find({ trainer: req.body.userId }).lean();
+    const { _page, _limit } = req.query
+    const totalTrainee = await trainee.countDocuments({ trainer: req.body.userId })
+    const noOfPage = Math.ceil(totalTrainee / _limit)
+    const userData = await trainee.find({ trainer: req.body.userId }).limit(_limit).skip(_limit * (_page - 1)).lean();
     return res.status(200).send({
       message: "get trainer data success",
       success: true,
       trainee: userData,
+      noOfPage
     });
   } catch (error) {
     res.status(500).send({ message: error, success: false });
@@ -188,7 +184,7 @@ const getTrainees = async (req, res) => {
 };
 
 //---------------------------------------GET TRAINEES DETAILS-PROFILE-INFO---------------------------
-const getTraineeDetails = async (req, res) => {
+const getTraineeDetails = async (req, res, next) => {
   try {
     const userDetails = await trainee.findOne({ _id: req.body.traineeId }).populate('trainer');
     return res
@@ -199,14 +195,13 @@ const getTraineeDetails = async (req, res) => {
         trainee: userDetails,
       });
   } catch (error) {
-    res.status(500).send({ message: error, success: false });
-    console.error(error);
+    next(error)
   }
 };
 
 
 //--------------------------TRAINER-CAN-UPDATE TRAINEE DIET PLAN-----------------------
-const updateDietPlan = async (req, res) => {
+const updateDietPlan = async (req, res, next) => {
   try {
     const { _id, targetWeight, dailyCaloriegoal, proteinIntake, carbohydrateAndTatintake,
       mealPlanCreation, waterIntake, dietaryGoals, nutritionalAnalysis, supplementTracking } = req.body.dietPlan;
@@ -226,13 +221,12 @@ const updateDietPlan = async (req, res) => {
     const traineeinfo = await trainee.findOne({ _id: _id }).lean()
     return res.status(200).send({ message: 'New Diet-Plan Updated', success: true, trainee: traineeinfo })
   } catch (error) {
-    res.status(500).send({ message: error, success: false });
-    console.error(error);
+    next(error)
   }
 }
 
 //-----------------GET DASHBOARD DETAILS -------------------
-const getDashboardInfo = async (req, res) => {
+const getDashboardInfo = async (req, res, next) => {
   try {
     const startAt = new Date();
     startAt.setHours(0, 0, 0, 0);
@@ -257,10 +251,10 @@ const getDashboardInfo = async (req, res) => {
     })
 
     const sales = await Order.find({
-      $and:[{
-        trainerId:userId,
-      },{
-        status:'Success',
+      $and: [{
+        trainerId: userId,
+      }, {
+        status: 'Success',
       }]
     })
 
@@ -270,14 +264,14 @@ const getDashboardInfo = async (req, res) => {
     const perDayProfit = salesPerDay.reduce((accumulator, currentValue) => {
       return accumulator + parseInt(currentValue.trainerFees);
     }, 0)
-    const totalSales = sales.reduce((accumulator,currentValue)=>{
+    const totalSales = sales.reduce((accumulator, currentValue) => {
       return accumulator + parseInt(currentValue.price)
-    },0)
+    }, 0)
     const totalProfit = sales.reduce((accumulator, currentValue) => {
       return accumulator + parseInt(currentValue.trainerFees);
     }, 0);
-    const order = await Order.find({trainerId:userId}).populate('userId').sort({createdAt:-1}).limit(5)
-  
+    const order = await Order.find({ trainerId: userId }).populate('userId').sort({ createdAt: -1 }).limit(5)
+
     return res.status(200).send({
       message: 'getDataSuccess', success: true,
       order: order,
@@ -290,101 +284,98 @@ const getDashboardInfo = async (req, res) => {
         totalSales,
         totalProfit,
       }
-  })
+    })
 
   } catch (error) {
-    res.status(500).send({ message: error, success: false });
-    console.error(error);
+    next(error)
   }
 }
 //---------------------getSALES INFORMATION--------------
-const getSalesInfo = async(req,res)=>{
-  const {userId} = req.body;
+const getSalesInfo = async (req, res, next) => {
+  const { userId } = req.body;
   try {
     let perDate = []
     const totalSalesPerDay = [];
     const totalProfitPerDay = [];
 
     for (let i = 6; i >= 0; i--) {
-        const startAt = new Date()
-        startAt.setDate(startAt.getDate() - i)
-        startAt.setHours(0, 0, 0, 0)
+      const startAt = new Date()
+      startAt.setDate(startAt.getDate() - i)
+      startAt.setHours(0, 0, 0, 0)
 
-        const endAt = new Date(startAt);
-        endAt.setHours(23, 59, 59, 999);
+      const endAt = new Date(startAt);
+      endAt.setHours(23, 59, 59, 999);
 
-        const date = startAt.toDateString()
-        const dateAndMonth = date.slice(3, 10);
-        perDate.push(dateAndMonth);
+      const date = startAt.toDateString()
+      const dateAndMonth = date.slice(3, 10);
+      perDate.push(dateAndMonth);
 
-        const salesPerDay = await Order.find({ // -------to  fetch total  Order previos 7 days
-            $and: [{
-                proStartIn: {
-                    $gte: startAt,
-                    $lte: endAt,
-                }
-            }, {
-                status: 'Success'
-            },{
-              trainerId:userId,
-            }]
-        });
+      const salesPerDay = await Order.find({ // -------to  fetch total  Order previos 7 days
+        $and: [{
+          proStartIn: {
+            $gte: startAt,
+            $lte: endAt,
+          }
+        }, {
+          status: 'Success'
+        }, {
+          trainerId: userId,
+        }]
+      });
 
-        totalSalesPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
-            return accumulator + parseInt(currentValue.price);
-        }, 0))
+      totalSalesPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
+        return accumulator + parseInt(currentValue.price);
+      }, 0))
 
-        totalProfitPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
-            return accumulator + parseInt(currentValue.trainerFees)
-        }, 0))
+      totalProfitPerDay.push(salesPerDay.reduce((accumulator, currentValue) => {
+        return accumulator + parseInt(currentValue.trainerFees)
+      }, 0))
 
     }
     const totalSalesprevSevenDays = totalSalesPerDay.reduce((accumulator, currentValue) => {
-        return accumulator + currentValue;
+      return accumulator + currentValue;
     })
 
     return res.status(200).send({
-        message: 'get-salesData success',
-        totalProfitPerDay,
-        totalSalesPerDay,
-        totalSalesprevSevenDays,
-        date: perDate,
-        success: true
+      message: 'get-salesData success',
+      totalProfitPerDay,
+      totalSalesPerDay,
+      totalSalesprevSevenDays,
+      date: perDate,
+      success: true
     })
-  } catch (error) {  
-    res.status(500).send({ message: error, success: false });
-    console.error(error.message);
+  } catch (error) {
+    next(error)
   }
 }
 
-const getSalesReport=async(req,res)=>{
+const getSalesReport = async (req, res, next) => {
   try {
-    const { days,userId } = req.body;
+    const { days, userId } = req.body;
 
-        const today = new Date()
-        today.setDate(today.getDate() - days)
-        today.setHours(0, 0, 0, 0);
+    const today = new Date()
+    today.setDate(today.getDate() - days)
+    today.setHours(0, 0, 0, 0);
 
-        const endAt = new Date();
-        endAt.setHours(23, 59, 59, 999);
+    const endAt = new Date();
+    endAt.setHours(23, 59, 59, 999);
 
-        const salesReport = await Order.find({
-            $and: [{
-                createdAt: {
-                    $gte: today,
-                    $lte: endAt,
-                }
-            }, {
-                status: 'Success'
-            },{
-              trainerId:userId,
-            }]
-        }).populate('userId').populate('trainerId').sort({createdAt:-1})
-    
-         return res.status(200).send({message:"fetch message data",success:true,salesReport})
+    const salesReport = await Order.find({
+      $and: [{
+        createdAt: {
+          $gte: today,
+          $lte: endAt,
+        }
+      }, {
+        status: 'Success'
+      }, {
+        trainerId: userId,
+      }]
+    }).populate('userId').populate('trainerId').sort({ createdAt: -1 })
+
+    return res.status(200).send({ message: "fetch message data", success: true, salesReport })
   } catch (error) {
-    res.status(500).send({ message: error, success: false });
-    console.error(error.message);
+    next(error)
   }
 }
 

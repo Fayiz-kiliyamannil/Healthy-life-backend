@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const Order = require('../../Models/orderModel');
 const contact = require('../../Models/contact')
-const todayDate = new Date(); 
+const todayDate = new Date();
 const date = moment();
 const formateDate = date.format('DD-MM-YYYY')
 
@@ -37,10 +37,10 @@ const CallOtp = () => {
 
 
 //--------------    GET HOME ---------
-const getHome = async(req,res,next) =>{
+const getHome = async (req, res, next) => {
     try {
-        const fourTrainer = await trainers.find({is_block:false,is_verified:true}).limit(4);
-        return res.status(200).send({message:"get-trainers-info",success:true,trainer:fourTrainer})
+        const fourTrainer = await trainers.find({ is_block: false, is_verified: true }).limit(4);
+        return res.status(200).send({ message: "get-trainers-info", success: true, trainer: fourTrainer })
     } catch (error) {
         next(error)
     }
@@ -53,7 +53,6 @@ const securePassword = async (password) => {
 
         const passwordHash = await bcrypt.hash(password, 10)
         return passwordHash
-        console.log(passwordHash);
     } catch (error) {
         console.error("securepassworderrorr.........");
     }
@@ -62,7 +61,7 @@ const securePassword = async (password) => {
 
 
 
-const userLogin = async (req, res,next) => {
+const userLogin = async (req, res, next) => {
     try {
         const userData = await user.findOne({ email: req.body.email })
         if (userData) {
@@ -75,7 +74,7 @@ const userLogin = async (req, res,next) => {
                     const token = jwt.sign({ id: userData._id }, process.env.JWT_SECRET, {
                         expiresIn: "1d",
                     });
-                           
+
                     return res.status(200).send({ message: 'Login successful', success: true, data: token })
                 }
             } else {
@@ -91,16 +90,16 @@ const userLogin = async (req, res,next) => {
 
 }
 
-const register = async (req, res,next) => {
+const register = async (req, res, next) => {
     try {
         const userExist = await user.findOne({ email: req.body.email })
         if (userExist) {
             return res.status(200).send({ message: 'The user already exists', success: false })
-            
-        }else if(req.body.password !== req.body.repassword){
-         return res.status(200).send({message:'Password do not match.',success:false})
+
+        } else if (req.body.password !== req.body.repassword) {
+            return res.status(200).send({ message: 'Password do not match.', success: false })
         }
-        
+
         else {
             const passwordhash = await securePassword(req.body.password)
             email = req.body.email || email;
@@ -126,7 +125,7 @@ const register = async (req, res,next) => {
 
         }
     } catch (error) {
-       next(error)
+        next(error)
     }
 }
 //RESEND OTP-----------------------
@@ -136,9 +135,8 @@ const register = async (req, res,next) => {
 
 
 
-const registerOtp = async (req, res,next) => {
+const registerOtp = async (req, res, next) => {
     try {
-        console.log(req.body.Otp);
 
         if (req.body.Otp == otp) {
             const data = await user({
@@ -154,54 +152,58 @@ const registerOtp = async (req, res,next) => {
             return res.status(200).send({ message: "Error! Incorrect OTP Entered", success: false })
         }
     } catch (error) {
-       next(error)
+        next(error)
     }
 }
 
 
-const userVarified = async (req, res,next) => {
+const userVarified = async (req, res, next) => {
     try {
         const users = await user.findOne({ _id: req.body.userId })
-        const orderDetails = await Order.findOne({$and:[{userId:users._id},{status:'Success'}]})
+        const orderDetails = await Order.findOne({ $and: [{ userId: users._id }, { status: 'Success' }] })
         const endDate = new Date(orderDetails?.proEndIn)
-        if( endDate >= todayDate ){
-            return res.status(200).send({ success: true, data:users,isProUser:true})
+        if (endDate >= todayDate) {
+            return res.status(200).send({ success: true, data: users, isProUser: true })
         }
-        if (users) { 
-            return res.status(200).send({ success: true, data:users})
+        if (users) {
+            return res.status(200).send({ success: true, data: users })
         } else {
             return res.status(200).send({ message: "user does not exist", success: false })
         }
     } catch (error) {
-         next(error)
+        next(error)
     }
 }
 
 //---------------------------------get trainer ----------------------------------------
-const get_Traienrs = async (req,res,next) => {
+const get_Traienrs = async (req, res, next) => {
     try {
-        const trainersData = await trainers.find({is_block:false,is_verified:true});
-        const fourTrainer = await trainers.find({is_block:false,is_verified:true}).limit(4)
+        const { _page, _limit } = req.query
+        const totalTrainer = await trainers.countDocuments({ is_block: false, is_verified: true });
+        const noOfPage = Math.ceil(totalTrainer / _limit);
 
-        return res.status(200).send({message:"get-trainers-info",success:true,trainers:trainersData ,trainer:fourTrainer})
+        const trainersData = await trainers.find({ is_block: false, is_verified: true }).limit(_limit).skip(_limit * (_page - 1));
+        const fourTrainer = await trainers.find({ is_block: false, is_verified: true }).limit(4)
+
+        return res.status(200).send({ message: "get-trainers-info", success: true, trainers: trainersData, trainer: fourTrainer, noOfPage })
     } catch (error) {
-       next(error)
+        next(error)
     }
 }
 
 // ------------------------ here the render the contact page ---------------------
-const contactDetails = async(req,res,next)=>{
+const contactDetails = async (req, res, next) => {
     try {
-       await contact.create({
-        name:req.body.name,
-        email:req.body.email,
-        message:req.body.message,
-        date:formateDate
-       })
-       return res.status(200).send({message:'Your message sent' ,success:true})
+        await contact.create({
+            name: req.body.name,
+            email: req.body.email,
+            message: req.body.message,
+            date: formateDate
+        })
+        return res.status(200).send({ message: 'Your message sent', success: true })
     } catch (error) {
         next(error)
-      
+
     }
 }
 

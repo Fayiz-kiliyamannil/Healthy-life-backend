@@ -31,14 +31,12 @@ const createNewChat = async (req, res, next) => {
 //--------------------------------TO FETCH CHAT TO SPECIFIC TRAINERS---------------------
 const fetchChats = async (req, res, next) => {
     try {
-
         const userId = req.params.id // user id passing as params
         const trainerId = req.body.userId // trinainer id take from authmiddleware
         const fetchChatById = await chat.find({ $and: [{ userId, }, { trainerId }] }).populate('userId')
         return res.status(200).send({message:'fetch data by Id success',success:true,fetchChatById});
     } catch (error) {
         next(error)      
-        console.error(error.message);      
     }
 }   
       

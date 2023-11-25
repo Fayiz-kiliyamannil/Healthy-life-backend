@@ -91,7 +91,7 @@ const getTrainerProfile = async (req, res, next) => {
 
         return res.status(200).send({ message: "get-trainer-details success", success: true, trainer: trainerInfo, rating: averageRating, countRating })
     } catch (error) {
-        console.error(error.message);
+       
         next(error)
     }
 }

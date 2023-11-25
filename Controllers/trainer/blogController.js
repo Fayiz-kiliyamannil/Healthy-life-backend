@@ -8,71 +8,70 @@ const formateData = date.format('DD-MM-YYYY')
 
 
 //---------------------------TRAINER CAN UPLOAD BLOG----------
-const UploadBlog = async (req, res) => {
+const UploadBlog = async (req, res, next) => {
   try {
     await blog.create({ header: req.body.header, note: req.body.note, uploadDate: formateData, trainerId: req.body.userId, blogImg: req.file.filename })
     return res.status(200).send({ message: 'Blog Created', success: true });
   } catch (error) {
-    res.status(500).send({ message: 'error in UploadBlog', success: false })
-    console.error(error);
+    next(error)
   }
 }
 
 //-------------TRAINER CAN EDIT BLOG-------------------------------------
-const editBlog = async(req,res)=>{
+const editBlog = async (req, res, next) => {
   try {
-    const{_id,header,note,blogImg,} = req.body
-      await blog.findOneAndUpdate({_id:_id},{$set:{
-        header:header,
-        note:note,
-        blogImg: blogImg ||req.file.filename
-      }})
-      return res.status(200).send({ message: 'Blog Edited', success: true });
+    const { _id, header, note, blogImg, } = req.body
+    await blog.findOneAndUpdate({ _id: _id }, {
+      $set: {
+        header: header,
+        note: note,
+        blogImg: blogImg || req.file.filename
+      }
+    })
+    return res.status(200).send({ message: 'Blog Edited', success: true });
   } catch (error) {
-    console.error(error.message);
-    return res.status(500).send({ message: error.message, success: false })
+    next(error)
   }
 }
 
 
 //---------------TRAINER- VIEW-EDIT BLOG--------------------
-const trainerBlog = async (req, res) => {
+const trainerBlog = async (req, res, next) => {
   try {
-    const { userId } = req.body
-    const trainerBlog = await blog.find({ trainerId: userId }).sort({ createdAt: -1 })
+    const { userId } = req.body;
+    const { _limit, _page } = req.query;
+    const totalBlog = await blog.countDocuments({ trainerId: userId })
+    const noOfPage = Math.ceil(totalBlog / _limit);
+    const trainerBlog = await blog.find({ trainerId: userId }).sort({ createdAt: -1 }).limit(_limit).skip(_limit * (_page - 1))
     if (trainerBlog) {
-      return res.status(200).send({ message: 'fetch-trainer-blog', success: true, trainerBlog })
+      return res.status(200).send({ message: 'fetch-trainer-blog', success: true, trainerBlog, noOfPage })
     } else {
       return res.status(401).send({ message: 'fetch-trainer-blog not found ', success: false })
     }
   } catch (error) {
-    console.error(error.message);
-    return res.status(500).send({ message: 'fetch-trainer-blog not found ', success: false })
+    next(error)
   }
 }
 
 // -------------  TRAIER-CAN DELETE - BLOG----------------
-const deleteBlog = async (req, res) => {
+const deleteBlog = async (req, res, next) => {
   try {
     const { Id, userId } = req.body
     await blog.deleteOne({ _id: Id })
     const trainerBlog = await blog.find({ trainerId: userId }).sort({ createdAt: -1 })
     return res.status(200).send({ message: 'trainer-blog-delete', success: true, trainerBlog: trainerBlog })
   } catch (error) {
-    console.error(error.message);
-    return res.status(500).send({ message: error.message, success: false })
-
+    next(error)
   }
 }
 
 // ------------------------TRAINER CAN EDIT BLOG ----------------
-const blogDetails = async (req, res) => {
+const blogDetails = async (req, res, next) => {
   try {
-    const blogDetails = await blog.findOne({_id:req.body.blogId})
-     return res.status(200).send({message:'get blog-details',success:true,blog:blogDetails})
+    const blogDetails = await blog.findOne({ _id: req.body.blogId })
+    return res.status(200).send({ message: 'get blog-details', success: true, blog: blogDetails })
   } catch (error) {
-    console.error(error.message);
-    return res.status(500).send({ message: error.message, success: false })
+    next(error)
   }
 }
 
