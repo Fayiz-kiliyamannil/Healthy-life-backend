@@ -175,21 +175,24 @@ const userVarified = async (req, res, next) => {
     }
 }
 
+
+
 //---------------------------------get trainer ----------------------------------------
 const get_Traienrs = async (req, res, next) => {
     try {
         const { _page, _limit } = req.query
-        const totalTrainer = await trainers.countDocuments({ is_block: false, is_verified: true });
+
+        const [totalTrainer,trainersData] = await Promise.all([
+            trainers.countDocuments({ is_block: false, is_verified: true }),
+            trainers.find({ is_block: false, is_verified: true }).limit(_limit).skip(_limit * (_page - 1))
+        ])
         const noOfPage = Math.ceil(totalTrainer / _limit);
-
-        const trainersData = await trainers.find({ is_block: false, is_verified: true }).limit(_limit).skip(_limit * (_page - 1));
-        const fourTrainer = await trainers.find({ is_block: false, is_verified: true }).limit(4)
-
-        return res.status(200).send({ message: "get-trainers-info", success: true, trainers: trainersData, trainer: fourTrainer, noOfPage })
+        return res.status(200).send({ message: "get-trainers-info", success: true, trainers: trainersData,  noOfPage })
     } catch (error) {
         next(error)
     }
 }
+
 
 // ------------------------ here the render the contact page ---------------------
 const contactDetails = async (req, res, next) => {

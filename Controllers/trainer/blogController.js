@@ -8,6 +8,7 @@ const formateData = date.format('DD-MM-YYYY')
 
 
 //---------------------------TRAINER CAN UPLOAD BLOG----------
+
 const UploadBlog = async (req, res, next) => {
   try {
     await blog.create({ header: req.body.header, note: req.body.note, uploadDate: formateData, trainerId: req.body.userId, blogImg: req.file.filename })
@@ -35,14 +36,19 @@ const editBlog = async (req, res, next) => {
 }
 
 
+
 //---------------TRAINER- VIEW-EDIT BLOG--------------------
 const trainerBlog = async (req, res, next) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.body;  
     const { _limit, _page } = req.query;
-    const totalBlog = await blog.countDocuments({ trainerId: userId })
+
+    const[totalBlog,trainerBlog] = await Promise.all([
+      blog.countDocuments({ trainerId: userId }),
+      blog.find({ trainerId: userId }).sort({ createdAt: -1 }).limit(_limit).skip(_limit * (_page - 1))
+    ])
+
     const noOfPage = Math.ceil(totalBlog / _limit);
-    const trainerBlog = await blog.find({ trainerId: userId }).sort({ createdAt: -1 }).limit(_limit).skip(_limit * (_page - 1))
     if (trainerBlog) {
       return res.status(200).send({ message: 'fetch-trainer-blog', success: true, trainerBlog, noOfPage })
     } else {

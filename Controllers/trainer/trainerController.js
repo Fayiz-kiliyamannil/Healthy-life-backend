@@ -17,6 +17,8 @@ const securePassword = async (password) => {
 };
 
 
+
+
 const trainerRegister = async (req, res, next) => {
   try {
     const trainerExist = await trainer.findOne({ email: req.body.email });
@@ -167,10 +169,13 @@ const trainerEditProfile = async (req, res, next) => {
 //-------------------------  GET TRAINEES------------------
 const getTrainees = async (req, res) => {
   try {
+
     const { _page, _limit } = req.query
-    const totalTrainee = await trainee.countDocuments({ trainer: req.body.userId })
+    const [totalTrainee, userData] = await Promise.all([
+      trainee.countDocuments({ trainer: req.body.userId }),
+      trainee.find({ trainer: req.body.userId }).limit(_limit).skip(_limit * (_page - 1)).lean(),
+    ])
     const noOfPage = Math.ceil(totalTrainee / _limit)
-    const userData = await trainee.find({ trainer: req.body.userId }).limit(_limit).skip(_limit * (_page - 1)).lean();
     return res.status(200).send({
       message: "get trainer data success",
       success: true,
@@ -232,31 +237,36 @@ const getDashboardInfo = async (req, res, next) => {
     startAt.setHours(0, 0, 0, 0);
     const endAt = new Date()
     endAt.setHours(23, 59, 59, 999);
-
     const { userId } = req.body;
-    const totalBlog = await Blog.countDocuments({ trainerId: userId });
-    const totalVideo = await Video.countDocuments({ trainerId: userId });
-    const totalTrainees = await User.countDocuments({ trainer: userId });
-    const salesPerDay = await Order.find({
-      $and: [{
-        trainerId: userId
-      }, {
-        proStartIn: {
-          $gte: startAt,
-          $lte: endAt
-        },
-      }, {
-        status: "Success"
-      },]
-    })
 
-    const sales = await Order.find({
-      $and: [{
-        trainerId: userId,
-      }, {
-        status: 'Success',
-      }]
-    })
+    const [totalBlog, totalVideo, totalTrainees, salesPerDay, sales, order] = await Promise.all([
+      Blog.countDocuments({ trainerId: userId }),
+      Video.countDocuments({ trainerId: userId }),
+      User.countDocuments({ trainer: userId }),
+
+      Order.find({
+        $and: [{
+          trainerId: userId
+        }, {
+          proStartIn: {
+            $gte: startAt,
+            $lte: endAt
+          },
+        }, {
+          status: "Success"
+        },]
+      }),
+
+      Order.find({
+        $and: [{
+          trainerId: userId,
+        }, {
+          status: 'Success',
+        }]
+      }),
+
+      Order.find({ trainerId: userId }).populate('userId').sort({ createdAt: -1 }).limit(5)
+    ])
 
     const perDaySales = salesPerDay.reduce((accumulator, currentValue) => {
       return accumulator + parseInt(currentValue.price);
@@ -270,7 +280,7 @@ const getDashboardInfo = async (req, res, next) => {
     const totalProfit = sales.reduce((accumulator, currentValue) => {
       return accumulator + parseInt(currentValue.trainerFees);
     }, 0);
-    const order = await Order.find({ trainerId: userId }).populate('userId').sort({ createdAt: -1 }).limit(5)
+
 
     return res.status(200).send({
       message: 'getDataSuccess', success: true,
@@ -290,6 +300,7 @@ const getDashboardInfo = async (req, res, next) => {
     next(error)
   }
 }
+
 //---------------------getSALES INFORMATION--------------
 const getSalesInfo = async (req, res, next) => {
   const { userId } = req.body;
@@ -309,6 +320,7 @@ const getSalesInfo = async (req, res, next) => {
       const date = startAt.toDateString()
       const dateAndMonth = date.slice(3, 10);
       perDate.push(dateAndMonth);
+
 
       const salesPerDay = await Order.find({ // -------to  fetch total  Order previos 7 days
         $and: [{
@@ -348,6 +360,7 @@ const getSalesInfo = async (req, res, next) => {
     next(error)
   }
 }
+
 
 const getSalesReport = async (req, res, next) => {
   try {

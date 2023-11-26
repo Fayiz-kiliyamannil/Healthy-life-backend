@@ -12,9 +12,11 @@ const getAllMessage = async (req, res, next) => {
 const forDeleteMessage = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const deleteMessage = await Contact.findByIdAndDelete(id)
-        const contacts  =   await Contact.find().lean()
-        if (!deleteMessage) {
+
+        const contacts = await Contact.findByIdAndDelete(id)
+        .then(()=> Contact.find().lean())
+   
+        if (!contacts) {
             return res.send(404).send({ message: 'message not found', success: true })
         }
          

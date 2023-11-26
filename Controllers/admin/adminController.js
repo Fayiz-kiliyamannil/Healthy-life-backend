@@ -42,21 +42,26 @@ const getAllDetails = async (req, res,next) => {
         const endAt = new Date()
         endAt.setHours(23, 59, 59, 999);
   
-        const noOfUsers = await user.countDocuments({ is_block: false });
-        const blockedUsers = await user.countDocuments({ is_block: true })
-        const noOfTrainers = await Trainer.countDocuments({ is_verified: true });
-        const blockedTrainers = await Trainer.countDocuments({ is_block: true })
-        const sales = await Order.find({ status: 'Success' })
-        const salesPerDay = await Order.find({
-            $and: [{
-                proStartIn: {
-                    $gte: startAt,
-                    $lte: endAt,
-                }
-            }, {
-                status: "Success"
-            }]
-        })
+        const [noOfUsers,blockedUsers,noOfTrainers,blockedTrainers,sales,salesPerDay,order] = await Promise.all([
+            user.countDocuments({ is_block: false }),
+            user.countDocuments({ is_block: true }),
+            Trainer.countDocuments({ is_verified: true }),
+            Trainer.countDocuments({ is_block: true }),
+            Order.find({ status: 'Success' }),
+            Order.find({
+                $and: [{
+                    proStartIn: {
+                        $gte: startAt,
+                        $lte: endAt,
+                    }
+                }, {
+                    status: "Success"
+                }]
+            }),
+            Order.find().sort({ createdAt: -1 }).limit(5).populate('userId'),
+
+        ])
+       
         const perDaySales = salesPerDay.reduce((accumulator, currentValue) => {
             return accumulator + parseInt(currentValue.price);
         }, 0);
@@ -70,8 +75,6 @@ const getAllDetails = async (req, res,next) => {
             return accumulator + parseInt(currentValue.adminFees)
         }, 0)
 
-        const order = await Order.find().sort({ createdAt: -1 }).limit(10).populate('userId');
-        // const salesReport = await Order.find({status:'Success'}).sort({createdAt:-1}).populate('userId')
         return res.status(200).send({
             message: 'getDataSuccess', success: true,
             order: order,
@@ -110,6 +113,7 @@ const getSalesData = async (req, res,next) => {
             const date = startAt.toDateString()
             const dateAndMonth = date.slice(3, 10);
             perDate.push(dateAndMonth);
+
             const salesPerDay = await Order.find({ // -------to  fetch total  Order previos 7 days
                 $and: [{
                     proStartIn: {
@@ -181,10 +185,13 @@ const getSalesReport = async (req, res) => {
 //----------GET TO  ALL TRAINEES DETAILS --------------
 const all_Trainees = async (req, res) => {
     try {
-        const { _limit, _page } = req.query
-        const totalTrainee = await user.countDocuments()
+        const { _limit, _page } = req.query;
+        const [totalTrainee,userData] = await Promise.all([
+            await user.countDocuments(),
+            user.find({}).limit(_limit).skip(_limit * (_page - 1)),
+        ])
+
         const noOfPage = Math.ceil(totalTrainee / _limit);
-        const userData = await user.find({}).limit(_limit).skip(_limit * (_page - 1));
         res.status(200).send({ userData, success: true, noOfPage });
     } catch (error) {
      next(error)
