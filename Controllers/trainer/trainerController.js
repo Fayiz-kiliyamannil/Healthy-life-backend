@@ -6,6 +6,7 @@ const Blog = require('../../Models/blogModel');
 const Video = require('../../Models/videoModel');
 const User = require('../../Models/userModel');
 const Order = require('../../Models/orderModel');
+const Rating = require('../../Models/trainerRatingModel')
 
 const securePassword = async (password) => {
   try {
@@ -100,10 +101,22 @@ const trainerLogin = async (req, res, next) => {
 const trainerProfile = async (req, res, next) => {
   try {
     const trainerData = await trainer.findOne({ _id: req.body.userId });
+    const [totalRating, countRating] = await Promise.all([
+      Rating.find({ trainerId: trainerData._id }),
+      Rating.countDocuments({ trainerId: trainerData._id })
+    ])
+    const ratingTotal = totalRating.reduce((accumulator, currentValue) => {
+      return accumulator + parseInt(currentValue.rating)
+    }, 0)
+    const averageRating = Math.floor(ratingTotal / countRating);
+
+
     return res.status(200).send({
       message: "get-Traier-data",
       success: true,
       trainer: trainerData,
+      rating: averageRating,
+      countRating
     });
   } catch (error) {
     next(error)

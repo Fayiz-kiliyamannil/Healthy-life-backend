@@ -14,7 +14,6 @@ const updateProfile = async (req, res, next) => {
         const userInfo = await User.findOne({ _id: req.body._id }).lean()
 
         if (!req.file) {
-
             if (!userInfo.profile) {
 
                 return res.status(200).send({ message: 'Profile Image Required', success: false })
@@ -70,7 +69,7 @@ const getUser = async (req, res, next) => {
 
 const getTrainer = async (req, res, next) => {
     try {
-        const trainerData = await Trainer.find({ is_block: false }).lean();
+        const trainerData = await Trainer.find({ $and:[{is_block: false},{specilized:{$exists:true}}] }).lean();
         return res.status(200).send({ message: 'get-Trainer-data', success: true, trainer: trainerData });
     } catch (error) {
         next(error)
@@ -81,9 +80,11 @@ const getTrainer = async (req, res, next) => {
 const getTrainerProfile = async (req, res, next) => {
     try {
         const trainerInfo = await Trainer.findOne({ _id: req.body.id });
-
-        const totalRating = await Rating.find({ trainerId: trainerInfo._id })
-        const countRating = await Rating.countDocuments({ trainerId: trainerInfo._id });
+ 
+        const [totalRating,countRating] = await Promise.all([
+            Rating.find({ trainerId: trainerInfo._id }),
+            Rating.countDocuments({ trainerId: trainerInfo._id }),
+        ])
         const ratingTotal = totalRating.reduce((accumulator, currentValue) => {
             return accumulator + parseInt(currentValue.rating)
         }, 0)
@@ -144,8 +145,10 @@ const trainerRating = async (req, res, next) => {
 //--------------------------------  USER PROFILE DETAILS-----------------------------------
 const getProfile = async (req, res, next) => {
     try {
+        
         const userData = await User.findOne({ _id: req.body.userId }).populate('trainer')
-        if (userData) {
+
+        if (userData.trainer) {
             const trainerRating = await Rating.findOne({
                 $and: [
                     { userId: userData._id },
@@ -163,6 +166,11 @@ const getProfile = async (req, res, next) => {
                 user: userData,
                 rating: trainerRating,
                 order: order
+            });
+        }else{
+            return res.status(200).send({
+                message: 'get-user-info', success: true,
+                user: userData,
             });
         }
 
