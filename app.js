@@ -6,7 +6,7 @@ const path = require('path')
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB)
     .then(() => console.log('mongodbConnected...'))
-    .catch((error) => console.error('error in MongoDB'))
+    .catch((error) => console.error('error in MongoDB...'))
 
 const app = express();
 
@@ -33,7 +33,7 @@ app.use('/trainer', trainerRoute);
 app.use(errorHandler)
  
 
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5000;
 const server = app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 }) 
