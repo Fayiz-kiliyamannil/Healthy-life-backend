@@ -2,7 +2,7 @@ const blog = require('../../Models/blogModel');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const { findByIdAndUpdate, findOneAndUpdate } = require('../../Models/userModel');
-
+const cloudinary = require('../../Middlewares/cloudinaryConfig')
 const date = moment();
 const formateData = date.format('DD-MM-YYYY')
 
@@ -11,7 +11,17 @@ const formateData = date.format('DD-MM-YYYY')
 
 const UploadBlog = async (req, res, next) => {
   try {
-    await blog.create({ header: req.body.header, note: req.body.note, uploadDate: formateData, trainerId: req.body.userId, blogImg: req.file.filename })
+    const Image = req.file;
+    const imageUpload = await cloudinary.uploader.upload(Image.path);
+
+    await blog.create({
+      header: req.body.header,
+      note: req.body.note,
+      uploadDate: formateData,
+      trainerId: req.body.userId,
+      blogImg: imageUpload.secure_url
+    })
+
     return res.status(200).send({ message: 'Blog Created', success: true });
   } catch (error) {
     next(error)
@@ -21,12 +31,14 @@ const UploadBlog = async (req, res, next) => {
 //-------------TRAINER CAN EDIT BLOG-------------------------------------
 const editBlog = async (req, res, next) => {
   try {
+    const Image = req.file
+    const imageUpload = await cloudinary.uploader.upload(Image.path)
     const { _id, header, note, blogImg, } = req.body
     await blog.findOneAndUpdate({ _id: _id }, {
       $set: {
         header: header,
         note: note,
-        blogImg: blogImg || req.file.filename
+        blogImg: blogImg || imageUpload.secure_url
       }
     })
     return res.status(200).send({ message: 'Blog Edited', success: true });
@@ -40,10 +52,10 @@ const editBlog = async (req, res, next) => {
 //---------------TRAINER- VIEW-EDIT BLOG--------------------
 const trainerBlog = async (req, res, next) => {
   try {
-    const { userId } = req.body;  
+    const { userId } = req.body;
     const { _limit, _page } = req.query;
 
-    const[totalBlog,trainerBlog] = await Promise.all([
+    const [totalBlog, trainerBlog] = await Promise.all([
       blog.countDocuments({ trainerId: userId }),
       blog.find({ trainerId: userId }).sort({ createdAt: -1 }).limit(_limit).skip(_limit * (_page - 1))
     ])

@@ -4,11 +4,13 @@ const Trainer = require('../../Models/trainerModel');
 const Order = require('../../Models/orderModel')
 const todayDate = new Date();
 const Rating = require('../../Models/trainerRatingModel');
-
+const cloudinary = require('../../Middlewares/cloudinaryConfig');
 
 //---------------------------------------------USER UPDATE THE PROFILE---------------------------
 const updateProfile = async (req, res, next) => {
     try {
+
+        const  Image = req.file
         const trainerName = req.body.trainer.firstname || req.body.trainer;
         const traienrInfo = await Trainer.findOne({ firstname: trainerName })
         const userInfo = await User.findOne({ _id: req.body._id }).lean()
@@ -32,13 +34,14 @@ const updateProfile = async (req, res, next) => {
             })
             return res.status(200).send({ message: 'Update your Profile', success: true })
         } else {
+            let imageUpload = await cloudinary.uploader.upload(Image.path)
             await User.findByIdAndUpdate({ _id: req.body._id }, {
                 $set: {
                     lastname: req.body.lastname,
                     phone: req.body.phone,
                     trainer: traienrInfo._id,
                     about: req.body.about,
-                    profile: req.file.filename,
+                    profile: imageUpload.secure_url,
                     gender: req.body.gender,
                     age: req.body.age,
                     weight: req.body.weight,

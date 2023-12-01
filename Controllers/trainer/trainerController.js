@@ -6,7 +6,8 @@ const Blog = require('../../Models/blogModel');
 const Video = require('../../Models/videoModel');
 const User = require('../../Models/userModel');
 const Order = require('../../Models/orderModel');
-const Rating = require('../../Models/trainerRatingModel')
+const Rating = require('../../Models/trainerRatingModel');
+const cloudinary = require('../../Middlewares/cloudinaryConfig')
 
 const securePassword = async (password) => {
   try {
@@ -128,7 +129,7 @@ const trainerProfile = async (req, res, next) => {
 const trainerEditProfile = async (req, res, next) => {
   try {
     const trainerInfo = await trainer.findOne({ _id: req.body._id })
-
+     const Image = req.file;
     if (!req.file) {
       if (!trainerInfo.profile) {
 
@@ -153,13 +154,14 @@ const trainerEditProfile = async (req, res, next) => {
         )
       }
     } else {
+        const imageUpload = await cloudinary.uploader.upload(Image.path)
       await trainer.findByIdAndUpdate(
         { _id: req.body._id },
         {
           $set: {
             firstname: req.body.firstname,
             lastname: req.body.lastname,
-            profile: req.file.filename,
+            profile: imageUpload.secure_url,
             phone: req.body.phone,
             about: req.body.about,
             gender: req.body.gender,

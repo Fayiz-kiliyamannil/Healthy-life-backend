@@ -16,7 +16,9 @@ userRoute.post('/otp', userController.registerOtp);
 userRoute.get('/get-home-info', userController.getHome);
 userRoute.post('/get-user-into-by-id', authMiddlewares, userVarified, userController.userVarified);
 userRoute.get('/get-trainers', authMiddlewares, userController.get_Traienrs);
+
 userRoute.post('/user-profile-update-info', multer.upload.single('profile'), profileController.updateProfile);
+
 userRoute.post('/get-user-info', authMiddlewares, profileController.getUser);
 userRoute.get('/get-trainer-info', authMiddlewares, profileController.getTrainer);
 userRoute.post('/get-trainers-details', authMiddlewares, profileController.getTrainerProfile);

@@ -1,18 +1,24 @@
 const { findByIdAndUpdate } = require('../../Models/userModel');
-const video = require('../../Models/videoModel')
+const Video = require('../../Models/videoModel')
 const moment = require('moment');
 const date = moment();
 const formateData = date.format('DD-MM-YYYY')
+const cloudinary = require('../../Middlewares/cloudinaryConfig');
+
+
 
 // ------------------HERE TRANER CAN UPLOAD THE VIDEO--------------------
 const uploadVideo = async (req, res, next) => {
     try {
+        const video = req.file;
         const { userId, header, note } = req.body;
-        await video.create({
+        const videoUpload = await cloudinary.uploader.upload(video.path,{resource_type:'video'})
+
+        await Video.create({
             trainerId: userId,
             header,
             note,
-            video: req.file.filename,
+            video: videoUpload.secure_url,
             uploadDate: formateData,
         })
         return res.status(200).send({ message: 'Video Uploaded', success: true })
@@ -24,10 +30,10 @@ const uploadVideo = async (req, res, next) => {
 //----------------FETCH - VIDEO TO TRAINER-----------------
 const getTrainerVideo = async (req, res, next) => {
     try {
-        const { _limit, _page } = req.query;
+        const { _limit, _page } = req.query;    
         const [totalVideo, trainerVideo] = await Promise.all([
-            video.countDocuments({ trainerId: req.body.userId }),
-            video.find({ trainerId: req.body.userId }).lean().sort({ createdAt: -1 }).limit(_limit).skip(_limit * (_page - 1))
+            Video.countDocuments({ trainerId: req.body.userId }),
+            Video.find({ trainerId: req.body.userId }).lean().sort({ createdAt: -1 }).limit(_limit).skip(_limit * (_page - 1))
         ])
         const noOfPage = Math.ceil(totalVideo / _limit);
         return res.status(200).send({ message: 'fetch-trainerVideo', success: true, videoData: trainerVideo, noOfPage });
@@ -42,8 +48,8 @@ const deleteVideo = async (req, res, next) => {
         if (!videoId || !userId) {
             return res.status(400).send({ message: 'Invalid request. Missing required parameters.', success: false });
         }
-        const trainerVideo = await video.findByIdAndDelete(req.body.videoId)
-            .then(() => video.find({ trainerId: req.body.userId }).lean())
+        const trainerVideo = await Video.findByIdAndDelete(req.body.videoId)
+            .then(() => Video.find({ trainerId: req.body.userId }).lean().sort({ createdAt: -1 }))
 
         return res.status(200).send({ message: 'Video Deleted', success: true, videoData: trainerVideo });
     } catch (error) {
@@ -54,7 +60,7 @@ const deleteVideo = async (req, res, next) => {
 //-----------HERE TRAINER - FETCH VEDIO DETAILS-------------
 const getVideoDetails = async (req, res, next) => {
     try {
-        const videoDetails = await video.findOne({ _id: req.body.videoId }).lean()
+        const videoDetails = await Video.findOne({ _id: req.body.videoId }).lean()
         return res.status(200).send({ message: 'fetch-videoDetails', success: true, videoDetails });
     } catch (error) {
         next(error)
