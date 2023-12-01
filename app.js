@@ -13,7 +13,7 @@ const app = express();
 
 app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: "https://healthy-life-pi.vercel.app",
       methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
       credentials: true,
     })
@@ -48,7 +48,7 @@ const server = app.listen(port, () => {
  const io = require('socket.io')(server,{       
     pingTimeout: 60000,
     cors:{
-        origin:'http://localhost:3000',
+        origin:'https://healthy-life-pi.vercel.app',
          methods: ['GET','POST'] 
         
     }
