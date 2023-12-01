@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config()
-const path = require('path')
+const path = require('path');
+const cors = require('cors')
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB)
@@ -10,7 +11,13 @@ mongoose.connect(process.env.MONGODB)
 
 const app = express();
 
-
+app.use(
+    cors({
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
+      credentials: true,
+    })
+  );
 
 
 app.use(express.json()); // Parse JSON bodies, if any
