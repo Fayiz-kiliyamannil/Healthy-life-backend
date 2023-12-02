@@ -31,8 +31,11 @@ const UploadBlog = async (req, res, next) => {
 //-------------TRAINER CAN EDIT BLOG-------------------------------------
 const editBlog = async (req, res, next) => {
   try {
-    const Image = req.file
-    const imageUpload = await cloudinary.uploader.upload(Image.path)
+    const Image = req.file;
+    
+    if(Image){
+        var imageUpload = await cloudinary.uploader.upload(Image.path)
+    } 
     const { _id, header, note, blogImg, } = req.body
     await blog.findOneAndUpdate({ _id: _id }, {
       $set: {

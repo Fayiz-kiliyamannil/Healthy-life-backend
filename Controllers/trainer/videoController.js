@@ -71,7 +71,7 @@ const getVideoDetails = async (req, res, next) => {
 const updateVideo = async (req, res, next) => {
     try {
         const { videoId, header, note } = req.body
-        await video.findByIdAndUpdate({ _id: videoId }, {
+        await Video.findByIdAndUpdate({ _id: videoId }, {
             $set: {
                 header,
                 note,
