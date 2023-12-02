@@ -63,6 +63,7 @@ const server = app.listen(port, () => {
     })    
     socket.on('joinChat',(room)=>{
         socket.join(room);
+       
       
     })
     socket.on('newChat',(newChat)=>{
@@ -73,12 +74,14 @@ const server = app.listen(port, () => {
     socket.on('trainerJoin',(trainerId)=>{ // ----------to connect trainer
         socket.join(trainerId);
         socket.emit('me',trainerId) // ---------id pass
+       
 
     })
 
     socket.on('userJoin',(userId)=>{
         socket.join(userId);
         socket.emit('me',userId) // ---------id pass
+       
 
     })
 
