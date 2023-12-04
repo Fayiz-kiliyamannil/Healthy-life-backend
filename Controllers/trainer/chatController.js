@@ -8,7 +8,7 @@ const options = {
   hour12: true, // Use 12-hour time format with AM/PM
 };
 
-const formattedTime = new Intl.DateTimeFormat('en-US', options).format(date);
+const formattedTime = new Intl.DateTimeFormat('en-IN', options).format(date);
 
 //------------------------------------TO CREATE NEW CHAT FROM TRAINER TO USER SIDE----------------
 const createNewChat = async (req, res, next) => {
