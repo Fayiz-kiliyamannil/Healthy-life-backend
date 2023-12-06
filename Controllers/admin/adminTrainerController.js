@@ -5,16 +5,29 @@ const Rating = require('../../Models/trainerRatingModel');
 
 const allTrainerDetails = async (req, res, next) => {
   try {
+    const { searchValue } = req.body;
     const { _limit, _page } = req.query;
     const totalTrainer = await trainer.countDocuments({ is_verified: true })
-    const noOfPage = Math.ceil(totalTrainer / _limit)
-    const trainerData = await trainer.find({ is_verified: true })
+    const noOfPage = Math.ceil(totalTrainer / _limit);
+
+    const query = {
+      is_verified: true,
+    };
+    if(searchValue){
+      query.$or=[
+        { firstname: { $regex: searchValue, $options: 'i' } },
+        { lastname: { $regex: searchValue, $options: 'i' } },
+      ]
+    }
+
+    const trainerData = await trainer.find(query)
       .limit(_limit).skip(_limit * (_page - 1)).lean();
+  
 
     return res.status(200).send({
       message: "fetch  all-trainer data",
       success: true,
-      trainer: trainerData,
+      value: trainerData,
       noOfPage,
     });
   } catch (error) {

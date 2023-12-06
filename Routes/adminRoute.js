@@ -11,8 +11,8 @@ adminRoute.post('/login',adminController.adminLogin);
 adminRoute.get('/get-dashboard-info',authMiddleware,adminController.getAllDetails);
 adminRoute.get('/get-sales-info',authMiddleware,adminController.getSalesData);
 adminRoute.post('/sales-report',authMiddleware,adminController.getSalesReport)
-adminRoute.get('/trainees',authMiddleware,adminController.all_Trainees);
-adminRoute.get('/trainers',authMiddleware,trainerController.allTrainerDetails);
+adminRoute.post('/trainees',authMiddleware,adminController.all_Trainees);
+adminRoute.post('/trainers',authMiddleware,trainerController.allTrainerDetails);
 adminRoute.get('/newtrainers',authMiddleware,trainerController.newTrainers);
 adminRoute.post('/confirm-trainer',authMiddleware,trainerController.confirmTrainer);
 adminRoute.post('/delete-trainer',authMiddleware,trainerController.deleteTrainer);

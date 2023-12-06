@@ -3,7 +3,8 @@ const user = require('../../Models/userModel');
 const Trainer = require('../../Models/trainerModel');
 const Order = require('../../Models/orderModel');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const { query } = require('express');
 const date = new Date();
 
 
@@ -35,14 +36,14 @@ const adminLogin = async (req, res, next) => {
 
 
 //------------FETCH DASHBOARD INFO ---------
-const getAllDetails = async (req, res,next) => {
+const getAllDetails = async (req, res, next) => {
     try {
         const startAt = new Date();
         startAt.setHours(0, 0, 0, 0);
         const endAt = new Date()
         endAt.setHours(23, 59, 59, 999);
-  
-        const [noOfUsers,blockedUsers,noOfTrainers,blockedTrainers,sales,salesPerDay,order] = await Promise.all([
+
+        const [noOfUsers, blockedUsers, noOfTrainers, blockedTrainers, sales, salesPerDay, order] = await Promise.all([
             user.countDocuments({ is_block: false }),
             user.countDocuments({ is_block: true }),
             Trainer.countDocuments({ is_verified: true }),
@@ -61,7 +62,7 @@ const getAllDetails = async (req, res,next) => {
             Order.find().sort({ createdAt: -1 }).limit(5).populate('userId'),
 
         ])
-       
+
         const perDaySales = salesPerDay.reduce((accumulator, currentValue) => {
             return accumulator + parseInt(currentValue.price);
         }, 0);
@@ -79,7 +80,7 @@ const getAllDetails = async (req, res,next) => {
             message: 'getDataSuccess', success: true,
             order: order,
 
-            details: { 
+            details: {
                 noOfUsers,
                 blockedUsers,
                 noOfTrainers,
@@ -96,7 +97,7 @@ const getAllDetails = async (req, res,next) => {
 }
 
 //----------GET SALES DATA-----------     
-const getSalesData = async (req, res,next) => {
+const getSalesData = async (req, res, next) => {
     try {
         let perDate = []
         const totalSalesPerDay = [];
@@ -185,16 +186,26 @@ const getSalesReport = async (req, res) => {
 //----------GET TO  ALL TRAINEES DETAILS --------------
 const all_Trainees = async (req, res) => {
     try {
+        const { searchValue } = req.body
         const { _limit, _page } = req.query;
-        const [totalTrainee,userData] = await Promise.all([
+        let query
+        if (searchValue) {
+             query = {
+                $or: [
+                    { firstname: { $regex: searchValue, $options: 'i' } },
+                    { lastname: { $regex: searchValue, $options: 'i' } },
+                ]
+            }
+        }
+        const [totalTrainee, userData] = await Promise.all([
             await user.countDocuments(),
-            user.find({}).limit(_limit).skip(_limit * (_page - 1)),
+            user.find(query).limit(_limit).skip(_limit * (_page - 1)),
         ])
 
         const noOfPage = Math.ceil(totalTrainee / _limit);
-        res.status(200).send({ userData, success: true, noOfPage });
+        res.status(200).send({value:userData, success: true, noOfPage });
     } catch (error) {
-     next(error)
+        next(error)
     }
 
 }
