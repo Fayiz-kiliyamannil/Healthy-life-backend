@@ -153,7 +153,7 @@ const getSalesData = async (req, res, next) => {
 }
 
 //---------GET SALES REPORT ---------------
-const getSalesReport = async (req, res) => {
+const getSalesReport = async (req, res,next) => {
     try {
         const { days } = req.body;
 
@@ -177,14 +177,13 @@ const getSalesReport = async (req, res) => {
 
         return res.status(200).send({ message: "fetch message data", success: true, salesReport })
     } catch (error) {
-        res.status(500).send({ message: error.message, succeess: false })
-        console.error(error.message);
+       next(error)
     }
 }
 
 
 //----------GET TO  ALL TRAINEES DETAILS --------------
-const all_Trainees = async (req, res) => {
+const all_Trainees = async (req, res,next) => {
     try {
         const { searchValue } = req.body
         const { _limit, _page } = req.query;

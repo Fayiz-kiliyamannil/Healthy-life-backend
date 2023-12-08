@@ -38,11 +38,23 @@ const allTrainerDetails = async (req, res, next) => {
 //--------------------------GET NEW TRAINER DATA---------------------
 const newTrainers = async (req, res, next) => {
   try {
-    const newTrainerData = await trainer.find({ is_verified: false }).lean();
+    const { searchValue } = req.body;
+    const query = {
+      is_verified: false,
+    };
+    if(searchValue){
+      query.$or=[
+        { firstname: { $regex: searchValue, $options: 'i' } },
+        { lastname: { $regex: searchValue, $options: 'i' } },
+      ]
+    }
+
+    const newTrainerData = await trainer.find(query).lean();
+    
     return res.status(200).send({
       message: "fetch new-trainer data",
       success: true,
-      newTrainer: newTrainerData,
+      value: newTrainerData,
     });
   } catch (error) {
     next(error)

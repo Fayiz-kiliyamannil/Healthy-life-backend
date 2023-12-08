@@ -13,7 +13,7 @@ adminRoute.get('/get-sales-info',authMiddleware,adminController.getSalesData);
 adminRoute.post('/sales-report',authMiddleware,adminController.getSalesReport)
 adminRoute.post('/trainees',authMiddleware,adminController.all_Trainees);
 adminRoute.post('/trainers',authMiddleware,trainerController.allTrainerDetails);
-adminRoute.get('/newtrainers',authMiddleware,trainerController.newTrainers);
+adminRoute.post('/newtrainers',authMiddleware,trainerController.newTrainers);
 adminRoute.post('/confirm-trainer',authMiddleware,trainerController.confirmTrainer);
 adminRoute.post('/delete-trainer',authMiddleware,trainerController.deleteTrainer);
 adminRoute.post('/trainee-details',authMiddleware,traineeController .traineeDetails);
